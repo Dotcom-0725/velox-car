@@ -5,6 +5,7 @@ import { ToastProvider } from "./hooks/useToast";
 import { NoPaymentBanner } from "./components/NoPaymentBanner";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
+import { DeveloperBanner } from "./components/DeveloperBanner";
 import { WhatsAppFloat } from "./components/WhatsAppFloat";
 import { StickyBottomBar } from "./components/StickyBottomBar";
 import { Home } from "./pages/Home";
@@ -62,6 +63,7 @@ function PublicShell() {
           <Route path="*" element={<Home />} />
         </Routes>
       </main>
+      <DeveloperBanner />
       <Footer />
       <WhatsAppFloat />
       <StickyBottomBar />

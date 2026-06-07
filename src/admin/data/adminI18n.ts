@@ -1,0 +1,257 @@
+// ============================================
+// Admin i18n — FR / AR / EN
+// ============================================
+import { useApp } from "../../context/AppContext";
+
+export const adminMessages = {
+  fr: {
+    // Brand
+    "admin.panel": "Admin Panel",
+    "admin.publicSite": "Voir le site public",
+    "admin.resetData": "Réinitialiser les données démo",
+    "admin.confirmReset": "Réinitialiser toutes les données démo ?",
+    "admin.search": "Rechercher réservation, client…",
+    "admin.notifications": "Notifications",
+    "admin.markAllRead": "Tout marquer lu",
+    "admin.noNotifications": "Aucune notification",
+    "admin.logout": "Déconnexion",
+    "admin.greeting": "Bonjour ! Voici un aperçu de l'activité au",
+
+    // Nav
+    "nav.dashboard": "Tableau de bord",
+    "nav.bookings": "Réservations",
+    "nav.contracts": "Contrats",
+    "nav.newContract": "Nouveau contrat",
+    "nav.quickBooking": "Réservation rapide",
+    "nav.messages": "Messages",
+    "nav.calendar": "Calendrier",
+    "nav.fleet": "Flotte",
+    "nav.customers": "Clients",
+    "nav.locations": "Agences",
+    "nav.pricing": "Tarification",
+    "nav.reports": "Rapports",
+    "nav.reviews": "Avis",
+    "nav.whatsapp": "WhatsApp",
+    "nav.logs": "Journal",
+    "nav.settings": "Paramètres",
+
+    // Stats
+    "stat.bookings": "Réservations",
+    "stat.revenue": "Revenus du mois",
+    "stat.active": "En cours",
+    "stat.pending": "En attente",
+    "stat.available": "Voitures dispo.",
+    "stat.occupancy": "Taux d'occupation",
+    "stat.last7days": "ces 7 derniers jours",
+    "stat.collections": "Encaissements",
+    "stat.carsOut": "Voitures sorties",
+    "stat.toConfirm": "À confirmer",
+    "stat.readyToRent": "Prêtes à louer",
+    "stat.fleetUsed": "Flotte mobilisée",
+
+    // Charts
+    "chart.revenue30d": "Revenus (30 derniers jours)",
+    "chart.topCars": "Top 5 véhicules",
+    "chart.bookingStatus": "Statut des réservations",
+    "chart.upcomingPickups": "Prises en charge (aujourd'hui & demain)",
+    "chart.upcomingReturns": "Restitutions (aujourd'hui & demain)",
+    "chart.recentBookings": "Réservations récentes",
+    "chart.viewAll": "Voir tout →",
+    "chart.allBookings": "Toutes les réservations",
+    "chart.noPickups": "Aucune prise en charge planifiée",
+    "chart.noReturns": "Aucune restitution planifiée",
+    "chart.today": "AUJ.",
+    "chart.tomorrow": "DEM.",
+
+    // Alerts
+    "alert.maintenance": "véhicule(s) en maintenance",
+    "alert.see": "Voir →",
+
+    // Common buttons
+    "btn.new": "Nouvelle",
+    "btn.newBooking": "Nouvelle réservation",
+    "btn.calendar": "Calendrier",
+    "btn.save": "Enregistrer",
+    "btn.cancel": "Annuler",
+    "btn.close": "Fermer",
+    "btn.delete": "Supprimer",
+    "btn.edit": "Modifier",
+    "btn.confirm": "Confirmer",
+    "btn.export": "Exporter",
+    "btn.print": "Imprimer",
+    "btn.send": "Envoyer",
+    "btn.search": "Rechercher",
+
+    // Roles
+    "role.superAdmin": "Super Admin",
+    "role.manager": "Manager",
+    "role.staff": "Staff",
+  },
+  en: {
+    "admin.panel": "Admin Panel",
+    "admin.publicSite": "View public website",
+    "admin.resetData": "Reset demo data",
+    "admin.confirmReset": "Reset all demo data?",
+    "admin.search": "Search booking, customer…",
+    "admin.notifications": "Notifications",
+    "admin.markAllRead": "Mark all as read",
+    "admin.noNotifications": "No notifications",
+    "admin.logout": "Logout",
+    "admin.greeting": "Hello! Here is the activity overview for",
+
+    "nav.dashboard": "Dashboard",
+    "nav.bookings": "Bookings",
+    "nav.contracts": "Contracts",
+    "nav.newContract": "New contract",
+    "nav.quickBooking": "Quick booking",
+    "nav.messages": "Messages",
+    "nav.calendar": "Calendar",
+    "nav.fleet": "Fleet",
+    "nav.customers": "Customers",
+    "nav.locations": "Locations",
+    "nav.pricing": "Pricing",
+    "nav.reports": "Reports",
+    "nav.reviews": "Reviews",
+    "nav.whatsapp": "WhatsApp",
+    "nav.logs": "Activity Log",
+    "nav.settings": "Settings",
+
+    "stat.bookings": "Bookings",
+    "stat.revenue": "Monthly revenue",
+    "stat.active": "Active",
+    "stat.pending": "Pending",
+    "stat.available": "Available cars",
+    "stat.occupancy": "Occupancy rate",
+    "stat.last7days": "in the last 7 days",
+    "stat.collections": "Payments",
+    "stat.carsOut": "Cars out",
+    "stat.toConfirm": "To confirm",
+    "stat.readyToRent": "Ready to rent",
+    "stat.fleetUsed": "Fleet in use",
+
+    "chart.revenue30d": "Revenue (last 30 days)",
+    "chart.topCars": "Top 5 vehicles",
+    "chart.bookingStatus": "Booking status",
+    "chart.upcomingPickups": "Pickups (today & tomorrow)",
+    "chart.upcomingReturns": "Returns (today & tomorrow)",
+    "chart.recentBookings": "Recent bookings",
+    "chart.viewAll": "View all →",
+    "chart.allBookings": "All bookings",
+    "chart.noPickups": "No scheduled pickups",
+    "chart.noReturns": "No scheduled returns",
+    "chart.today": "TODAY",
+    "chart.tomorrow": "TOM.",
+
+    "alert.maintenance": "vehicle(s) in maintenance",
+    "alert.see": "View →",
+
+    "btn.new": "New",
+    "btn.newBooking": "New booking",
+    "btn.calendar": "Calendar",
+    "btn.save": "Save",
+    "btn.cancel": "Cancel",
+    "btn.close": "Close",
+    "btn.delete": "Delete",
+    "btn.edit": "Edit",
+    "btn.confirm": "Confirm",
+    "btn.export": "Export",
+    "btn.print": "Print",
+    "btn.send": "Send",
+    "btn.search": "Search",
+
+    "role.superAdmin": "Super Admin",
+    "role.manager": "Manager",
+    "role.staff": "Staff",
+  },
+  ar: {
+    "admin.panel": "لوحة الإدارة",
+    "admin.publicSite": "عرض الموقع العام",
+    "admin.resetData": "إعادة تعيين البيانات التجريبية",
+    "admin.confirmReset": "إعادة تعيين كل البيانات التجريبية؟",
+    "admin.search": "بحث عن حجز أو عميل…",
+    "admin.notifications": "الإشعارات",
+    "admin.markAllRead": "تعليم الكل كمقروء",
+    "admin.noNotifications": "لا توجد إشعارات",
+    "admin.logout": "تسجيل الخروج",
+    "admin.greeting": "مرحباً! هذه نظرة عامة على النشاط بتاريخ",
+
+    "nav.dashboard": "لوحة القيادة",
+    "nav.bookings": "الحجوزات",
+    "nav.contracts": "العقود",
+    "nav.newContract": "عقد جديد",
+    "nav.quickBooking": "حجز سريع",
+    "nav.messages": "الرسائل",
+    "nav.calendar": "التقويم",
+    "nav.fleet": "الأسطول",
+    "nav.customers": "العملاء",
+    "nav.locations": "الوكالات",
+    "nav.pricing": "الأسعار",
+    "nav.reports": "التقارير",
+    "nav.reviews": "الآراء",
+    "nav.whatsapp": "واتساب",
+    "nav.logs": "السجل",
+    "nav.settings": "الإعدادات",
+
+    "stat.bookings": "الحجوزات",
+    "stat.revenue": "إيرادات الشهر",
+    "stat.active": "قيد التشغيل",
+    "stat.pending": "في الانتظار",
+    "stat.available": "السيارات المتاحة",
+    "stat.occupancy": "معدل الإشغال",
+    "stat.last7days": "في آخر 7 أيام",
+    "stat.collections": "المدفوعات",
+    "stat.carsOut": "سيارات مؤجرة",
+    "stat.toConfirm": "بانتظار التأكيد",
+    "stat.readyToRent": "جاهزة للإيجار",
+    "stat.fleetUsed": "الأسطول قيد الاستخدام",
+
+    "chart.revenue30d": "الإيرادات (آخر 30 يوماً)",
+    "chart.topCars": "أفضل 5 سيارات",
+    "chart.bookingStatus": "حالة الحجوزات",
+    "chart.upcomingPickups": "الاستلامات (اليوم وغداً)",
+    "chart.upcomingReturns": "الإرجاعات (اليوم وغداً)",
+    "chart.recentBookings": "الحجوزات الأخيرة",
+    "chart.viewAll": "عرض الكل ←",
+    "chart.allBookings": "جميع الحجوزات",
+    "chart.noPickups": "لا توجد استلامات مجدولة",
+    "chart.noReturns": "لا توجد إرجاعات مجدولة",
+    "chart.today": "اليوم",
+    "chart.tomorrow": "غداً",
+
+    "alert.maintenance": "سيارة/سيارات في الصيانة",
+    "alert.see": "عرض ←",
+
+    "btn.new": "جديد",
+    "btn.newBooking": "حجز جديد",
+    "btn.calendar": "التقويم",
+    "btn.save": "حفظ",
+    "btn.cancel": "إلغاء",
+    "btn.close": "إغلاق",
+    "btn.delete": "حذف",
+    "btn.edit": "تعديل",
+    "btn.confirm": "تأكيد",
+    "btn.export": "تصدير",
+    "btn.print": "طباعة",
+    "btn.send": "إرسال",
+    "btn.search": "بحث",
+
+    "role.superAdmin": "مدير عام",
+    "role.manager": "مدير",
+    "role.staff": "موظف",
+  },
+} as const;
+
+export type AdminTKey = keyof typeof adminMessages.fr;
+
+export function useAdminT() {
+  const { locale } = useApp();
+  return (key: AdminTKey): string => {
+    const msgs = adminMessages[locale] || adminMessages.fr;
+    return (msgs as any)[key] || (adminMessages.fr as any)[key] || key;
+  };
+}
+
+export function useAdminLocale() {
+  const { locale } = useApp();
+  return locale;
+}

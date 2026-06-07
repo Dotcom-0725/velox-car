@@ -6,6 +6,12 @@
 const OCR_SPACE_API_KEY = import.meta.env.VITE_OCR_SPACE_API_KEY || 'helloworld';
 const OCR_SPACE_BASE_URL = 'https://api.ocr.space/parse/image';
 
+// Debug: Log API key status (remove in production)
+if (import.meta.env.DEV) {
+  console.log('🔑 OCR API Key configured:', OCR_SPACE_API_KEY !== 'helloworld');
+  console.log('📝 Using API Key:', OCR_SPACE_API_KEY.substring(0, 10) + '...');
+}
+
 export interface OCRResponse {
   OCRExitCode: number;
   IsErroredOnProcessing: boolean;

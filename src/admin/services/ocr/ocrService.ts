@@ -21,7 +21,12 @@ import { parseCin } from "./parsers/cinParser";
 import { parseLicense } from "./parsers/licenseParser";
 import { checkImageQuality } from "./imageQuality";
 
-const OCR_PROVIDER = (import.meta.env.VITE_OCR_PROVIDER as string) || "simulation";
+// استخدام OCR.space مباشرة مع المفتاح
+const OCR_PROVIDER: string = "ocrspace";
+const OCR_SPACE_API_KEY = "K82835046388957"; // مفتاح مباشر
+
+console.log("🔑 OCR Provider:", OCR_PROVIDER);
+console.log("🔑 API Key configured:", !!OCR_SPACE_API_KEY);
 
 export async function extractFromDocument(
   file: File,
@@ -212,7 +217,9 @@ function mulberry32(seed: number) {
 // Note: the public test key "helloworld" works but is rate-limited.
 // Use your own key (free signup) for production.
 async function runOcrSpaceOcr(file: File): Promise<string> {
-  const apiKey = (import.meta.env.VITE_OCRSPACE_API_KEY as string) || "helloworld";
+  const apiKey = OCR_SPACE_API_KEY;
+
+  console.log("🚀 Sending to OCR.Space with key:", apiKey.substring(0, 10) + "...");
 
   // OCR.space supports both Arabic and French — we use "fre" + auto-detect
   const formData = new FormData();

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Upload, Camera, X, FileImage, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 import { DocumentType, OcrResult } from "../services/ocr/types";
 import { extractFromDocument } from "../services/ocr/ocrService";
+import { compressImage } from "../services/ocr/imageCompressor";
 
 type Props = {
   type: DocumentType;
@@ -39,24 +40,39 @@ export function DocumentUploadCard({
         alert("Veuillez sélectionner une image (JPG, PNG, WebP)");
         return;
       }
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
+
       setProcessing(true);
-      setProgress(15);
+      setProgress(5);
       setResult(undefined);
+
+      // Compress image if needed (solves HTTP 413 on mobile)
+      let fileToSend = file;
+      try {
+        setProgress(10);
+        const compressed = await compressImage(file);
+        fileToSend = compressed.file;
+        console.log(`📦 Image: ${file.size} → ${compressed.size} bytes (${compressed.compressionRatio}%)`);
+      } catch (error) {
+        console.warn("⚠️ Compression failed, using original:", error);
+      }
+
+      // Show preview
+      const url = URL.createObjectURL(fileToSend);
+      setPreviewUrl(url);
+      setProgress(20);
 
       // Animate progress bar
       const progressTimer = setInterval(() => {
-        setProgress((p) => (p < 88 ? p + Math.random() * 8 : p));
+        setProgress((p) => (p < 85 ? p + Math.random() * 6 : p));
       }, 250);
 
       try {
-        const r = await extractFromDocument(file, type);
+        const r = await extractFromDocument(fileToSend, type);
         clearInterval(progressTimer);
         setProgress(100);
         setResult(r);
         if (r.success) {
-          onExtracted(file, r);
+          onExtracted(fileToSend, r);
         }
       } catch (e) {
         clearInterval(progressTimer);

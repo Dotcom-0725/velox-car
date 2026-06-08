@@ -232,13 +232,42 @@ async function runOcrSpaceOcr(file: File): Promise<string> {
   formData.append("isTable", "false");
   formData.append("detectOrientation", "true"); // auto-rotate if needed
 
-  const res = await fetch("https://api.ocr.space/parse/image", {
-    method: "POST",
-    body: formData,
-  });
+  // Retry logic for transient errors
+  let attempts = 0;
+  const maxAttempts = 2;
+  let res!: Response;
 
-  if (!res.ok) {
-    throw new Error(`OCR.space erreur HTTP : ${res.status}`);
+  while (attempts < maxAttempts) {
+    attempts++;
+    try {
+      res = await fetch("https://api.ocr.space/parse/image", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) break;
+
+      // 413 = image too large (shouldn't happen after compression)
+      if (res.status === 413) {
+        throw new Error("L'image est trop volumineuse. Essayez une image plus petite ou recadrez-la.");
+      }
+
+      // 429 = rate limit
+      if (res.status === 429) {
+        throw new Error("Limite d'utilisation dépassée. Réessayez dans quelques minutes.");
+      }
+
+      if (attempts < maxAttempts) {
+        console.log(`⏳ Retry ${attempts}/${maxAttempts}...`);
+        await new Promise((r) => setTimeout(r, 1500 * attempts));
+        continue;
+      }
+
+      throw new Error(`OCR.space erreur HTTP : ${res.status}`);
+    } catch (error) {
+      if (attempts >= maxAttempts) throw error;
+      console.warn(`⚠️ Attempt ${attempts} failed:`, error);
+    }
   }
 
   const json = await res.json();

@@ -96,8 +96,13 @@ export function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-slate-100" dir={dir} lang={locale}>
-      {/* Sidebar */}
-      <aside className={`fixed inset-y-0 start-0 z-50 w-72 transform border-e border-slate-200 bg-white transition-transform lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full rtl:translate-x-full"}`}>
+      {/* Sidebar - Always LTR for consistent layout */}
+      <aside
+        className={`fixed inset-y-0 start-0 z-50 w-72 border-e border-slate-200 bg-white shadow-xl transition-transform duration-300 ease-in-out lg:shadow-none ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0`}
+        dir="ltr"
+      >
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
@@ -195,9 +200,11 @@ export function AdminLayout() {
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur-lg">
           <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
             <div className="flex items-center gap-3">
+              {/* Hamburger menu - always visible */}
               <button
-                onClick={() => setSidebarOpen(true)}
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 lg:hidden"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+                aria-label="Toggle menu"
               >
                 <Menu className="h-5 w-5" />
               </button>

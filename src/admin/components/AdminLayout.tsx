@@ -96,11 +96,11 @@ export function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-slate-100" dir={dir} lang={locale}>
-      {/* Sidebar - Always LTR for consistent layout */}
+      {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 start-0 z-50 w-72 border-e border-slate-200 bg-white shadow-xl transition-transform duration-300 ease-in-out lg:shadow-none ${
+        className={`fixed inset-y-0 z-50 w-72 border-e border-slate-200 bg-white shadow-xl transition-transform duration-300 ease-in-out lg:shadow-none ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0`}
+        } ${dir === "rtl" ? "end-0 start-auto" : "start-0"}`}
         dir="ltr"
       >
         <div className="flex h-full flex-col">
@@ -195,7 +195,7 @@ export function AdminLayout() {
       )}
 
       {/* Main area */}
-      <div className="lg:ms-72">
+      <div className={`${sidebarOpen ? (dir === "rtl" ? "me-72" : "ms-72") : ""}`}>
         {/* Top bar */}
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur-lg">
           <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6">

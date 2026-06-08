@@ -221,19 +221,19 @@ async function runOcrSpaceOcr(file: File): Promise<string> {
 
   console.log("🚀 Sending to OCR.Space with key:", apiKey.substring(0, 10) + "...");
 
-  // OCR.space supports multiple languages - use Arabic + French for Moroccan docs
+  // OCR.space - use Arabic for Moroccan documents (contains Arabic + French text)
   const formData = new FormData();
   formData.append("file", file);
   formData.append("apikey", apiKey);
-  formData.append("language", "ara,fre,eng");   // Arabic + French + English
-  formData.append("isOverlayRequired", "true"); // Enable overlay for better accuracy
-  formData.append("OCREngine", "2");            // Engine 2 = best for mixed scripts
-  formData.append("scale", "true");             // upscale low-res images
+  formData.append("language", "ara");            // Arabic (supports mixed Arabic/French)
+  formData.append("isOverlayRequired", "false");
+  formData.append("OCREngine", "2");            // Engine 2 = best accuracy
+  formData.append("scale", "true");
   formData.append("isTable", "false");
-  formData.append("detectOrientation", "true"); // auto-rotate if needed
+  formData.append("detectOrientation", "true");
   
   console.log("📤 Sending file:", file.name, file.size, "bytes");
-  console.log(" Language: ara,fre,eng");
+  console.log(" Language: ara (Arabic)");
 
   // Retry logic for transient errors
   let attempts = 0;

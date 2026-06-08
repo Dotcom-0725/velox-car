@@ -221,16 +221,19 @@ async function runOcrSpaceOcr(file: File): Promise<string> {
 
   console.log("🚀 Sending to OCR.Space with key:", apiKey.substring(0, 10) + "...");
 
-  // OCR.space supports both Arabic and French — we use "fre" + auto-detect
+  // OCR.space supports multiple languages - use Arabic + French for Moroccan docs
   const formData = new FormData();
   formData.append("file", file);
   formData.append("apikey", apiKey);
-  formData.append("language", "fre");           // fre = French (Moroccan docs)
-  formData.append("isOverlayRequired", "false");
-  formData.append("OCREngine", "2");            // Engine 2 = best for Latin + Arabic
+  formData.append("language", "ara,fre,eng");   // Arabic + French + English
+  formData.append("isOverlayRequired", "true"); // Enable overlay for better accuracy
+  formData.append("OCREngine", "2");            // Engine 2 = best for mixed scripts
   formData.append("scale", "true");             // upscale low-res images
   formData.append("isTable", "false");
   formData.append("detectOrientation", "true"); // auto-rotate if needed
+  
+  console.log("📤 Sending file:", file.name, file.size, "bytes");
+  console.log(" Language: ara,fre,eng");
 
   // Retry logic for transient errors
   let attempts = 0;
@@ -271,17 +274,39 @@ async function runOcrSpaceOcr(file: File): Promise<string> {
   }
 
   const json = await res.json();
+  
+  console.log("📥 OCR.Space Response:", JSON.stringify(json).substring(0, 200));
+  
+  // Check for errors
   if (json.IsErroredOnProcessing) {
     const err = Array.isArray(json.ErrorMessage)
       ? json.ErrorMessage.join(" · ")
       : json.ErrorMessage;
+    console.error("❌ OCR.Space Error:", err);
     throw new Error(`OCR.space : ${err}`);
   }
 
-  // Extract text from all parsed pages
-  const parsed: string = (json.ParsedResults || [])
-    .map((p: any) => p?.ParsedText || "")
+  // Extract text from all parsed results
+  const parsedResults = json.ParsedResults || [];
+  console.log(`📊 ParsedResults count: ${parsedResults.length}`);
+  
+  if (parsedResults.length === 0) {
+    throw new Error("OCR.space : Aucun résultat - vérifiez que l'image contient du texte");
+  }
+
+  const parsed: string = parsedResults
+    .map((p: any) => {
+      if (!p?.ParsedText) {
+        console.warn("⚠️ Empty ParsedText in result:", p);
+        return "";
+      }
+      return p.ParsedText;
+    })
+    .filter((text: string) => text.trim().length > 0)
     .join("\n");
+
+  console.log("📝 Extracted text length:", parsed.length, "characters");
+  console.log("📝 First 300 chars:", parsed.substring(0, 300));
 
   if (!parsed.trim()) {
     throw new Error("Aucun texte détecté — vérifiez la qualité de l'image");

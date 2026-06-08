@@ -87,7 +87,26 @@ export function DocumentUploadCard({
   const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) handleFile(file);
-    e.target.value = ""; // Allow re-uploading same file
+    // Reset input to allow re-uploading same file
+    if (e.target) {
+      e.target.value = "";
+    }
+  };
+
+  const handleCameraClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (cameraInputRef.current) {
+      cameraInputRef.current.click();
+    }
+  };
+
+  const handleFileClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
@@ -163,13 +182,15 @@ export function DocumentUploadCard({
             <p className="mt-1 text-[10px] text-slate-500">JPG, PNG (max 10 MB)</p>
             <div className="mt-3 flex gap-2">
               <button
-                onClick={() => fileInputRef.current?.click()}
+                type="button"
+                onClick={handleFileClick}
                 className="flex items-center gap-1 rounded-lg bg-navy-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-navy-800"
               >
                 <Upload className="h-3 w-3" /> Fichier
               </button>
               <button
-                onClick={() => cameraInputRef.current?.click()}
+                type="button"
+                onClick={handleCameraClick}
                 className="flex items-center gap-1 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-600"
               >
                 <Camera className="h-3 w-3" /> Caméra
@@ -181,6 +202,7 @@ export function DocumentUploadCard({
               accept="image/*"
               className="hidden"
               onChange={onInputChange}
+              onClick={(e) => e.stopPropagation()}
             />
             <input
               ref={cameraInputRef}
@@ -189,6 +211,7 @@ export function DocumentUploadCard({
               capture="environment"
               className="hidden"
               onChange={onInputChange}
+              onClick={(e) => e.stopPropagation()}
             />
           </div>
         ) : (

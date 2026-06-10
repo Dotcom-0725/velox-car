@@ -155,7 +155,21 @@ export function DeveloperBanner() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
+          className="relative"
         >
+            {/* Animated background image */}
+            <div className="absolute inset-0 -z-10 overflow-hidden rounded-3xl">
+              <img
+                src="/dev/rachid-devworks.jpg"
+                alt=""
+                className="h-full w-full object-cover opacity-20 blur-sm"
+                style={{
+                  animation: "slowZoom 20s ease-in-out infinite alternate",
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent" />
+            </div>
+
             {/* Hook */}
             <h2 className="text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl lg:text-4xl">
               {t.title}
@@ -297,7 +311,7 @@ export function DeveloperBanner() {
 
             {/* Tagline */}
             <p className="mt-5 border-t border-white/10 pt-4 text-xs italic text-slate-400">
-              💡 {t.tagline} · {t.response} 🚀
+              �� {t.tagline} · {t.response} 🚀
             </p>
           </motion.div>
       </div>

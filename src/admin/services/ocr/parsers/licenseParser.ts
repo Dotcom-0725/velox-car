@@ -1,6 +1,5 @@
 // ============================================
 // Moroccan Driver License parser - Professional Version
-// Uses multiple strategies for maximum accuracy
 // ============================================
 import { LicenseData, ExtractedField } from "../types";
 
@@ -13,22 +12,18 @@ export function parseLicense(rawText: string): Partial<LicenseData> {
   const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   const result: Partial<LicenseData> = {};
 
-  console.log("📝 License Raw text:", text.substring(0, 500));
+  console.log("🔍 License Parser - Raw text:", text);
+  console.log("🔍 License Parser - Lines:", lines);
 
   // ============================================
-  // STRATEGY 1: License Number (Most Critical)
+  // 1. License Number (Most Critical)
   // ============================================
   
   const licensePatterns = [
-    // "Permis N° 52/007657" - Most common
     /PERMIS\s+N[°o][\s:]+(\d{2,3}\s*[/\\]\s*\d{4,8})/i,
-    // "N° du permis: 52/007657"
     /N[°o]\s*(?:DU\s+)?PERMIS[\s:]+(\d{2,3}\s*[/\\]\s*\d{4,8})/i,
-    // "رقم الرخصة 52/007657"
     /رقم\s+الرخصة[\s:]+(\d{2,3}\s*[/\\]\s*\d{4,8})/i,
-    // Standalone with slash
     /\b(\d{2,3}\s*[/\\]\s*\d{5,8})\b/,
-    // Long numeric only
     /\b(\d{10,12})\b/,
   ];
 
@@ -37,17 +32,17 @@ export function parseLicense(rawText: string): Partial<LicenseData> {
     if (match && match[1]) {
       const cleaned = match[1].replace(/\s/g, '').replace(/\\/g, '/');
       if (cleaned.length >= 6 && /\d/.test(cleaned)) {
-        // Reject if looks like date (e.g., 04/1972)
+        // Reject if looks like date
         const parts = cleaned.split('/');
         if (parts.length === 2) {
           const second = parseInt(parts[1]);
           if (second > 1900 && second < 2100) {
-            console.log("⚠️ Rejected license number (looks like date):", cleaned);
+            console.log("⚠️ Rejected (looks like date):", cleaned);
             continue;
           }
         }
         
-        result.licenseNumber = field(cleaned, 0.95, match[0]);
+        result.licenseNumber = field(cleaned, 0.95);
         console.log("✅ License Number:", result.licenseNumber.value);
         break;
       }
@@ -55,36 +50,35 @@ export function parseLicense(rawText: string): Partial<LicenseData> {
   }
 
   // ============================================
-  // STRATEGY 2: Full Name
+  // 2. Full Name
   // ============================================
   
-  // "Prénom: RACHID\nNom: ACHERKOUK"
-  const prenomNomMatch = text.match(/PR[ÉE]NOM[:\s]+([A-ZÀ-Ÿ][A-ZÀ-Ÿ\-']{2,})\s*\n\s*NOM[:\s]+([A-ZÀ-Ÿ][A-ZÀ-Ÿ\-']{2,})/i);
-  if (prenomNomMatch) {
-    result.fullName = field(`${prenomNomMatch[1]} ${prenomNomMatch[2]}`, 0.93);
-    console.log("✅ Name from Prénom/Nom:", result.fullName.value);
-  }
+  const namePatterns = [
+    /PR[ÉE]NOM[:\s]+([A-ZÀ-Ÿ][A-ZÀ-Ÿ\-']{2,})\s*\n\s*NOM[:\s]+([A-ZÀ-Ÿ][A-ZÀ-Ÿ\-']{2,})/i,
+    /NOM[:\s]+([A-ZÀ-Ÿ][A-ZÀ-Ÿ\-']{2,})\s*\n\s*PR[ÉE]NOM[:\s]+([A-ZÀ-Ÿ][A-ZÀ-Ÿ\-']{2,})/i,
+    /الإسم\s+(?:الشخصي|العائلي)[:\s]+([\u0600-\u06FF\s]{3,})/i,
+  ];
   
-  // "Nom: ACHERKOUK\nPrénom: RACHID"
-  if (!result.fullName) {
-    const nomPrenomMatch = text.match(/NOM[:\s]+([A-ZÀ-Ÿ][A-ZÀ-Ÿ\-']{2,})\s*\n\s*PR[ÉE]NOM[:\s]+([A-ZÀ-Ÿ][A-ZÀ-Ÿ\-']{2,})/i);
-    if (nomPrenomMatch) {
-      result.fullName = field(`${nomPrenomMatch[2]} ${nomPrenomMatch[1]}`, 0.93);
-      console.log("✅ Name from Nom/Prénom:", result.fullName.value);
-    }
-  }
-  
-  // Arabic name
-  if (!result.fullName) {
-    const arabicNameMatch = text.match(/الإسم\s+(?:الشخصي|العائلي)[:\s]+([\u0600-\u06FF\s]{3,})/i);
-    if (arabicNameMatch) {
-      result.fullName = field(arabicNameMatch[1].trim(), 0.87);
-      console.log("✅ Name from Arabic:", result.fullName.value);
+  for (const pat of namePatterns) {
+    const match = text.match(pat);
+    if (match) {
+      let fullName = '';
+      if (match[2]) {
+        fullName = `${match[1]} ${match[2]}`;
+      } else {
+        fullName = match[1];
+      }
+      
+      if (fullName.trim().length > 3) {
+        result.fullName = field(fullName.trim(), 0.93);
+        console.log("✅ Name:", result.fullName.value);
+        break;
+      }
     }
   }
 
   // ============================================
-  // STRATEGY 3: Birth Date
+  // 3. Birth Date
   // ============================================
   
   const birthPatterns = [
@@ -105,15 +99,12 @@ export function parseLicense(rawText: string): Partial<LicenseData> {
   }
 
   // ============================================
-  // STRATEGY 4: Issue Date
+  // 4. Issue Date
   // ============================================
   
   const issuePatterns = [
-    // "Délivré le 15/08/1996"
     /(?:D[ée]LIVR[ée]\s+LE|DATE\s+DE\s+D[ée]LIVRANCE)[:\s]+(\d{1,2}[./\-\s]\d{1,2}[./\-\s]\d{2,4})/i,
-    // "Chefchaouen le 15/08/1996"
     /\w+\s+LE\s+(\d{1,2}[./\-\s]\d{1,2}[./\-\s]\d{2,4})/i,
-    // "في شفشاون 15/08/1996"
     /في\s+[\u0600-\u06FF\s]+\s+(\d{1,2}[./\-\s]\d{1,2}[./\-\s]\d{2,4})/i,
   ];
   
@@ -130,13 +121,11 @@ export function parseLicense(rawText: string): Partial<LicenseData> {
   }
 
   // ============================================
-  // STRATEGY 5: Expiry Date
+  // 5. Expiry Date
   // ============================================
   
   const expiryPatterns = [
-    // "Date de fin de validité 01/02/2026"
     /(?:DATE\s+DE\s+FIN\s+DE\s+VALIDIT[ÉE]|تاريخ\s+نهاية\s+الصلاحية)[:\s]+(\d{1,2}[./\-\s]\d{1,2}[./\-\s]\d{2,4})/i,
-    // "Valable jusqu'au 01/02/2026"
     /(?:VALABLE\s+JUSQU['']AU|Expire\s+le)[:\s]+(\d{1,2}[./\-\s]\d{1,2}[./\-\s]\d{2,4})/i,
   ];
   
@@ -152,7 +141,7 @@ export function parseLicense(rawText: string): Partial<LicenseData> {
     }
   }
 
-  // Fallback: Calculate issue date from expiry (10 years validity)
+  // Fallback: Calculate from expiry
   if (!result.issueDate && result.expiryDate) {
     const expDate = new Date(result.expiryDate.value);
     expDate.setFullYear(expDate.getFullYear() - 10);
@@ -161,14 +150,12 @@ export function parseLicense(rawText: string): Partial<LicenseData> {
   }
 
   // ============================================
-  // STRATEGY 6: Categories (From Verso Table)
+  // 6. Categories
   // ============================================
   
   const categories: string[] = [];
   
-  // Parse verso table: "B 15/08/1996" or "A1 [icon] 12/05/2010"
   for (const line of lines) {
-    // Match category letter + date on same line
     const catMatch = line.match(/^(A[12]?|B|C[1E]?|D[1E]?|EB|EC|ED)\s+.*?\d{1,2}[./\-\s]\d{1,2}[./\-\s]\d{2,4}/i);
     if (catMatch) {
       const cat = catMatch[1].toUpperCase();
@@ -180,31 +167,25 @@ export function parseLicense(rawText: string): Partial<LicenseData> {
   
   if (categories.length > 0) {
     result.categories = field(categories.join(','), 0.96);
-    console.log("✅ Categories (from verso):", result.categories.value);
+    console.log("✅ Categories:", result.categories.value);
   } else {
-    // Fallback: Single category from recto
     const rectoCatMatch = text.match(/\b(?:CAT[ÉE]GORIE|الصنف)[:\s]+([A-E][12]?)/i);
     if (rectoCatMatch) {
       result.categories = field(rectoCatMatch[1].toUpperCase(), 0.90);
-      console.log("✅ Category (from recto):", result.categories.value);
+      console.log("✅ Category (recto):", result.categories.value);
     } else {
-      // Last fallback: standalone B (most common)
-      const standaloneCat = text.match(/(?:^|\n)([ABCDE])(?:\s|$)/m);
-      if (standaloneCat && standaloneCat[1] !== 'M' && standaloneCat[1] !== 'F') {
-        result.categories = field(standaloneCat[1], 0.75);
-        console.log("✅ Category (standalone):", result.categories.value);
-      } else {
-        result.categories = field('B', 0.60);
-      }
+      result.categories = field('B', 0.60);
+      console.log("✅ Category (default):", result.categories.value);
     }
   }
 
   // ============================================
-  // STRATEGY 7: Country
+  // 7. Country
   // ============================================
   
   if (text.toUpperCase().includes('MAROC') || text.includes('المملكة المغربية')) {
     result.issuingCountry = field('Maroc', 0.95);
+    console.log("✅ Country:", result.issuingCountry.value);
   }
 
   console.log("📊 Final License Result:", result);
@@ -212,7 +193,7 @@ export function parseLicense(rawText: string): Partial<LicenseData> {
 }
 
 // ============================================
-// Helper Functions
+// Helper
 // ============================================
 
 function normalizeDate(dateStr: string): string {

@@ -64,9 +64,8 @@ export function NewContract() {
   }, [existingContract, searchParams]);
 
   // Init form
-  const tmrw = new Date(Date.now() + 86400000).toISOString().split("T")[0];
-  const inThree = new Date(Date.now() + 3 * 86400000).toISOString().split("T")[0];
   const today = new Date().toISOString().split("T")[0];
+  const inThree = new Date(Date.now() + 3 * 86400000).toISOString().split("T")[0];
 
   const [form, setForm] = useState({
     // Numéro
@@ -79,7 +78,7 @@ export function NewContract() {
     kmDepart: 0,
     kmRetour: 0,
     // Dates
-    pickupDate: tmrw,
+    pickupDate: today,
     pickupTime: "10:00",
     returnDate: inThree,
     returnTime: "10:00",

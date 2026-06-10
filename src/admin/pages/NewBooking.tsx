@@ -17,7 +17,7 @@ export function NewBooking() {
   const [step, setStep] = useState(1);
   const [customers] = useState(db.getCustomers());
 
-  const tmrw = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+  const today = new Date().toISOString().split("T")[0];
   const inFive = new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0];
 
   const [form, setForm] = useState({
@@ -26,7 +26,7 @@ export function NewBooking() {
     isNewCustomer: false,
     newCustomer: { fullName: "", email: "", phone: "", licenseNumber: "", licenseExpiry: "", idType: "CIN" as "CIN" | "Passport", idNumber: "" },
     // Dates & location
-    pickupDate: tmrw,
+    pickupDate: today,
     returnDate: inFive,
     pickupTime: "10:00",
     returnTime: "10:00",

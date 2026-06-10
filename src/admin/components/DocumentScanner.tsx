@@ -4,6 +4,7 @@ import { Sparkles, Wand2, CheckCircle2, AlertCircle, Info, Edit3, Zap } from "lu
 import { DocumentUploadCard } from "./DocumentUploadCard";
 import { OcrResult, CinData, LicenseData, ExtractedField } from "../services/ocr/types";
 import { useToast } from "../../hooks/useToast";
+import { useApp } from "../../context/AppContext";
 
 export type ScannedDocuments = {
   cinRecto?: { file: File; result: OcrResult };
@@ -38,6 +39,7 @@ type Props = {
 
 export function DocumentScanner({ onApply, onCancel }: Props) {
   const { show } = useToast();
+  const { locale } = useApp();
   const [docs, setDocs] = useState<ScannedDocuments>({});
   const [reviewMode, setReviewMode] = useState(false);
   const [editableData, setEditableData] = useState<ExtractedClientData | null>(null);
@@ -103,7 +105,7 @@ export function DocumentScanner({ onApply, onCancel }: Props) {
   const handleApply = () => {
     if (!editableData) return;
     onApply(editableData, docs);
-    show("✓ Données appliquées au formulaire", "success");
+    show(locale === "ar" ? "✓ تم تطبيق البيانات على الاستمارة" : locale === "en" ? "✓ Data applied to form" : "✓ Données appliquées au formulaire", "success");
   };
 
   return (
@@ -115,11 +117,10 @@ export function DocumentScanner({ onApply, onCancel }: Props) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-extrabold text-amber-900">
-            🤖 Scan intelligent OCR
+            {locale === "ar" ? "🤖 المسح الذكي OCR" : locale === "en" ? "🤖 Smart OCR Scan" : "🤖 Scan intelligent OCR"}
           </p>
           <p className="mt-0.5 text-xs text-amber-800">
-            Téléversez la CIN et le permis du client → les données seront extraites
-            automatiquement et le formulaire sera pré-rempli.
+            {locale === "ar" ? "ارفع البطاقة الوطنية ورخصة السياقة → سيتم استخراج البيانات تلقائياً وملء الاستمارة" : locale === "en" ? "Upload the ID card and driver's license → data will be extracted automatically and the form pre-filled" : "Téléversez la CIN et le permis du client → les données seront extraites automatiquement et le formulaire sera pré-rempli."}
           </p>
         </div>
         {onCancel && !reviewMode && (
@@ -127,7 +128,7 @@ export function DocumentScanner({ onApply, onCancel }: Props) {
             onClick={onCancel}
             className="rounded-lg px-2 py-1 text-xs font-bold text-amber-800 hover:bg-amber-100"
           >
-            Saisir manuellement
+            {locale === "ar" ? "إدخال يدوي" : locale === "en" ? "Manual entry" : "Saisir manuellement"}
           </button>
         )}
       </div>
@@ -138,22 +139,22 @@ export function DocumentScanner({ onApply, onCancel }: Props) {
           {/* CIN section */}
           <div>
             <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-              🪪 Carte d'identité nationale (CIN)
+              {locale === "ar" ? "🪪 البطاقة الوطنية للتعريف (CIN)" : locale === "en" ? "🪪 National Identity Card (CIN)" : "🪪 Carte d'identité nationale (CIN)"}
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
               <DocumentUploadCard
                 type="cin-recto"
                 icon="🪪"
-                title="CIN — Recto"
-                subtitle="Face avant (photo + numéro)"
+                title={locale === "ar" ? "البطاقة — الوجه الأمامي" : locale === "en" ? "ID — Front" : "CIN — Recto"}
+                subtitle={locale === "ar" ? "الوجه الأمامي (صورة + رقم)" : locale === "en" ? "Front side (photo + number)" : "Face avant (photo + numéro)"}
                 onExtracted={(file, result) => setDocs((d) => ({ ...d, cinRecto: { file, result } }))}
                 onRemove={() => setDocs((d) => ({ ...d, cinRecto: undefined }))}
               />
               <DocumentUploadCard
                 type="cin-verso"
                 icon="📄"
-                title="CIN — Verso"
-                subtitle="Face arrière (adresse) — optionnel"
+                title={locale === "ar" ? "البطاقة — الوجه الخلفي" : locale === "en" ? "ID — Back" : "CIN — Verso"}
+                subtitle={locale === "ar" ? "الوجه الخلفي (العنوان) — اختياري" : locale === "en" ? "Back side (address) — optional" : "Face arrière (adresse) — optionnel"}
                 onExtracted={(file, result) => setDocs((d) => ({ ...d, cinVerso: { file, result } }))}
                 onRemove={() => setDocs((d) => ({ ...d, cinVerso: undefined }))}
               />
@@ -163,22 +164,22 @@ export function DocumentScanner({ onApply, onCancel }: Props) {
           {/* License section */}
           <div>
             <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-              🚗 Permis de conduire
+              {locale === "ar" ? "🚗 رخصة السياقة" : locale === "en" ? "🚗 Driver's License" : "🚗 Permis de conduire"}
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
               <DocumentUploadCard
                 type="license"
                 icon="🚗"
-                title="Permis — Recto"
-                subtitle="Face avant (photo + N° permis)"
+                title={locale === "ar" ? "الرخصة — الوجه الأمامي" : locale === "en" ? "License — Front" : "Permis — Recto"}
+                subtitle={locale === "ar" ? "الوجه الأمامي (صورة + رقم الرخصة)" : locale === "en" ? "Front side (photo + license number)" : "Face avant (photo + N° permis)"}
                 onExtracted={(file, result) => setDocs((d) => ({ ...d, license: { file, result } }))}
                 onRemove={() => setDocs((d) => ({ ...d, license: undefined }))}
               />
               <DocumentUploadCard
                 type="license-verso"
                 icon="📋"
-                title="Permis — Verso"
-                subtitle="Face arrière (catégories) — optionnel"
+                title={locale === "ar" ? "الرخصة — الوجه الخلفي" : locale === "en" ? "License — Back" : "Permis — Verso"}
+                subtitle={locale === "ar" ? "الوجه الخلفي (الفئات) — اختياري" : locale === "en" ? "Back side (categories) — optional" : "Face arrière (catégories) — optionnel"}
                 onExtracted={(file, result) => setDocs((d) => ({ ...d, licenseVerso: { file, result } }))}
                 onRemove={() => setDocs((d) => ({ ...d, licenseVerso: undefined }))}
               />
@@ -196,12 +197,12 @@ export function DocumentScanner({ onApply, onCancel }: Props) {
                 <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                 <div>
                   <p className="font-extrabold">
-                    {aggregated && Object.values(aggregated).filter((v) => typeof v === "string" && v).length} champ(s) extrait(s)
+                    {aggregated && Object.values(aggregated).filter((v) => typeof v === "string" && v).length} {locale === "ar" ? "حقل تم استخراجه" : locale === "en" ? "field(s) extracted" : "champ(s) extrait(s)"}
                   </p>
                   <p className="text-xs">
-                    Confiance moyenne : <span className="font-bold">{aggregated?.confidenceScore}%</span>
+                    {locale === "ar" ? "متوسط الثقة" : locale === "en" ? "Average confidence" : "Confiance moyenne"} : <span className="font-bold">{aggregated?.confidenceScore}%</span>
                     {!hasCinAndLicense && (
-                      <span className="ms-2 text-amber-700">· ⚠️ {!docs.cinRecto ? "CIN" : "Permis"} manquant</span>
+                      <span className="ms-2 text-amber-700">· ⚠️ {!docs.cinRecto ? (locale === "ar" ? "البطاقة" : locale === "en" ? "ID" : "CIN") : (locale === "ar" ? "الرخصة" : locale === "en" ? "License" : "Permis")} {locale === "ar" ? "مفقود" : locale === "en" ? "missing" : "manquant"}</span>
                     )}
                   </p>
                 </div>
@@ -211,7 +212,7 @@ export function DocumentScanner({ onApply, onCancel }: Props) {
                 className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 px-5 py-2.5 text-sm font-extrabold text-white shadow-md shadow-emerald-500/30 hover:shadow-lg"
               >
                 <Wand2 className="h-4 w-4" />
-                Vérifier & appliquer →
+                {locale === "ar" ? "تحقق و → تطبيق" : locale === "en" ? "Verify & → apply" : "Vérifier & appliquer →"}
               </button>
             </motion.div>
           )}
@@ -220,8 +221,7 @@ export function DocumentScanner({ onApply, onCancel }: Props) {
           <div className="flex items-start gap-2 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
             <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-slate-400" />
             <p>
-              <strong>💡 Conseils pour une meilleure extraction :</strong> bonne lumière,
-              cadrage net, document à plat, pas de reflets. Formats supportés : JPG, PNG, WebP.
+              <strong>{locale === "ar" ? "💡 نصائح للحصول على استخراج أفضل:" : locale === "en" ? "💡 Tips for better extraction:" : "💡 Conseils pour une meilleure extraction :"}</strong> {locale === "ar" ? "إضاءة جيدة، تأطير واضح، وثيقة مسطحة، بدون انعكاسات. الصيغ المدعومة: JPG, PNG, WebP." : locale === "en" ? "good lighting, clear framing, flat document, no reflections. Supported formats: JPG, PNG, WebP." : "bonne lumière, cadrage net, document à plat, pas de reflets. Formats supportés : JPG, PNG, WebP."}
             </p>
           </div>
         </>
@@ -238,8 +238,8 @@ export function DocumentScanner({ onApply, onCancel }: Props) {
             <div className="flex items-center gap-2 rounded-2xl border-2 border-sky-300 bg-sky-50 p-3 text-sm">
               <Edit3 className="h-4 w-4 text-sky-600" />
               <p className="text-sky-900">
-                <strong>Vérifiez et corrigez les données extraites</strong>{" "}
-                avant de les appliquer au formulaire.
+                <strong>{locale === "ar" ? "تحقق وصحح البيانات المستخرجة" : locale === "en" ? "Verify and correct extracted data" : "Vérifiez et corrigez les données extraites"}</strong>{" "}
+                {locale === "ar" ? "قبل تطبيقها على الاستمارة." : locale === "en" ? "before applying to the form." : "avant de les appliquer au formulaire."}
               </p>
             </div>
 
@@ -247,47 +247,47 @@ export function DocumentScanner({ onApply, onCancel }: Props) {
               {/* CIN section */}
               <div className="rounded-2xl border border-slate-200 bg-white p-4">
                 <h3 className="mb-3 flex items-center gap-2 text-sm font-extrabold text-slate-900">
-                  🪪 Carte d'identité (CIN)
+                  {locale === "ar" ? "🪪 البطاقة الوطنية (CIN)" : locale === "en" ? "🪪 National ID (CIN)" : "🪪 Carte d'identité (CIN)"}
                 </h3>
                 <div className="space-y-2.5">
                   <ReviewField
-                    label="Nom complet"
+                    label={locale === "ar" ? "الاسم الكامل" : locale === "en" ? "Full name" : "Nom complet"}
                     value={editableData.fullName}
                     onChange={(v) => setEditableData({ ...editableData, fullName: v })}
                     field={getField(docs.cinRecto?.result, "fullName") || getField(docs.license?.result, "fullName")}
                   />
                   <ReviewField
-                    label="N° CIN"
+                    label={locale === "ar" ? "رقم البطاقة" : locale === "en" ? "ID Number" : "N° CIN"}
                     value={editableData.cinNumber}
                     onChange={(v) => setEditableData({ ...editableData, cinNumber: v })}
                     field={getField(docs.cinRecto?.result, "cinNumber")}
                   />
                   <ReviewField
-                    label="Date de naissance"
+                    label={locale === "ar" ? "تاريخ الميلاد" : locale === "en" ? "Birth date" : "Date de naissance"}
                     value={editableData.birthDate}
                     type="date"
                     onChange={(v) => setEditableData({ ...editableData, birthDate: v })}
                     field={getField(docs.cinRecto?.result, "birthDate")}
                   />
                   <ReviewField
-                    label="Lieu de naissance"
+                    label={locale === "ar" ? "مكان الميلاد" : locale === "en" ? "Birth place" : "Lieu de naissance"}
                     value={editableData.birthPlace}
                     onChange={(v) => setEditableData({ ...editableData, birthPlace: v })}
                     field={getField(docs.cinRecto?.result, "birthPlace")}
                   />
                   <ReviewField
-                    label="Adresse"
+                    label={locale === "ar" ? "العنوان" : locale === "en" ? "Address" : "Adresse"}
                     value={editableData.address}
                     onChange={(v) => setEditableData({ ...editableData, address: v })}
                     field={getField(docs.cinVerso?.result, "address") || getField(docs.cinRecto?.result, "address")}
                   />
                   <ReviewField
-                    label="Nationalité"
+                    label={locale === "ar" ? "الجنسية" : locale === "en" ? "Nationality" : "Nationalité"}
                     value={editableData.nationality}
                     onChange={(v) => setEditableData({ ...editableData, nationality: v })}
                   />
                   <ReviewField
-                    label="CIN expire le"
+                    label={locale === "ar" ? "تاريخ انتهاء البطاقة" : locale === "en" ? "ID expiry date" : "CIN expire le"}
                     value={editableData.cinExpiryDate}
                     type="date"
                     onChange={(v) => setEditableData({ ...editableData, cinExpiryDate: v })}

@@ -21,12 +21,7 @@ import { parseCin } from "./parsers/cinParser";
 import { parseLicense } from "./parsers/licenseParser";
 import { checkImageQuality } from "./imageQuality";
 
-// استخدام OCR.space مباشرة مع المفتاح
-const OCR_PROVIDER: string = "ocrspace";
-const OCR_SPACE_API_KEY = "K82835046388957"; // مفتاح مباشر
-
-console.log("🔑 OCR Provider:", OCR_PROVIDER);
-console.log("🔑 API Key configured:", !!OCR_SPACE_API_KEY);
+const OCR_PROVIDER = (import.meta.env.VITE_OCR_PROVIDER as string) || "simulation";
 
 export async function extractFromDocument(
   file: File,
@@ -217,96 +212,40 @@ function mulberry32(seed: number) {
 // Note: the public test key "helloworld" works but is rate-limited.
 // Use your own key (free signup) for production.
 async function runOcrSpaceOcr(file: File): Promise<string> {
-  const apiKey = OCR_SPACE_API_KEY;
+  const apiKey = (import.meta.env.VITE_OCRSPACE_API_KEY as string) || "helloworld";
 
-  console.log("🚀 Sending to OCR.Space with key:", apiKey.substring(0, 10) + "...");
-
-  // OCR.space - remove language parameter for auto-detection
+  // OCR.space supports both Arabic and French — we use "fre" + auto-detect
   const formData = new FormData();
   formData.append("file", file);
   formData.append("apikey", apiKey);
-  // NO language parameter - let OCR.space auto-detect
+  formData.append("language", "fre");           // fre = French (Moroccan docs)
   formData.append("isOverlayRequired", "false");
-  formData.append("OCREngine", "2");
-  formData.append("scale", "true");
+  formData.append("OCREngine", "2");            // Engine 2 = best for Latin + Arabic
+  formData.append("scale", "true");             // upscale low-res images
   formData.append("isTable", "false");
-  formData.append("detectOrientation", "true");
-  
-  console.log("📤 Sending file:", file.name, file.size, "bytes");
-  console.log(" Language: auto-detect (no parameter)");
+  formData.append("detectOrientation", "true"); // auto-rotate if needed
 
-  // Retry logic for transient errors
-  let attempts = 0;
-  const maxAttempts = 2;
-  let res!: Response;
+  const res = await fetch("https://api.ocr.space/parse/image", {
+    method: "POST",
+    body: formData,
+  });
 
-  while (attempts < maxAttempts) {
-    attempts++;
-    try {
-      res = await fetch("https://api.ocr.space/parse/image", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (res.ok) break;
-
-      // 413 = image too large (shouldn't happen after compression)
-      if (res.status === 413) {
-        throw new Error("L'image est trop volumineuse. Essayez une image plus petite ou recadrez-la.");
-      }
-
-      // 429 = rate limit
-      if (res.status === 429) {
-        throw new Error("Limite d'utilisation dépassée. Réessayez dans quelques minutes.");
-      }
-
-      if (attempts < maxAttempts) {
-        console.log(`⏳ Retry ${attempts}/${maxAttempts}...`);
-        await new Promise((r) => setTimeout(r, 1500 * attempts));
-        continue;
-      }
-
-      throw new Error(`OCR.space erreur HTTP : ${res.status}`);
-    } catch (error) {
-      if (attempts >= maxAttempts) throw error;
-      console.warn(`⚠️ Attempt ${attempts} failed:`, error);
-    }
+  if (!res.ok) {
+    throw new Error(`OCR.space erreur HTTP : ${res.status}`);
   }
 
   const json = await res.json();
-  
-  console.log("📥 OCR.Space Response:", JSON.stringify(json).substring(0, 200));
-  
-  // Check for errors
   if (json.IsErroredOnProcessing) {
     const err = Array.isArray(json.ErrorMessage)
       ? json.ErrorMessage.join(" · ")
       : json.ErrorMessage;
-    console.error("❌ OCR.Space Error:", err);
     throw new Error(`OCR.space : ${err}`);
   }
 
-  // Extract text from all parsed results
-  const parsedResults = json.ParsedResults || [];
-  console.log(`📊 ParsedResults count: ${parsedResults.length}`);
-  
-  if (parsedResults.length === 0) {
-    throw new Error("OCR.space : Aucun résultat - vérifiez que l'image contient du texte");
-  }
-
-  const parsed: string = parsedResults
-    .map((p: any) => {
-      if (!p?.ParsedText) {
-        console.warn("⚠️ Empty ParsedText in result:", p);
-        return "";
-      }
-      return p.ParsedText;
-    })
-    .filter((text: string) => text.trim().length > 0)
+  // Extract text from all parsed pages
+  const parsed: string = (json.ParsedResults || [])
+    .map((p: any) => p?.ParsedText || "")
     .join("\n");
-
-  console.log("📝 Extracted text length:", parsed.length, "characters");
-  console.log("📝 First 300 chars:", parsed.substring(0, 300));
 
   if (!parsed.trim()) {
     throw new Error("Aucun texte détecté — vérifiez la qualité de l'image");

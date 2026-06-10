@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Upload, Camera, X, FileImage, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 import { DocumentType, OcrResult } from "../services/ocr/types";
 import { extractFromDocument } from "../services/ocr/ocrService";
-import { compressImage } from "../services/ocr/imageCompressor";
 
 type Props = {
   type: DocumentType;
@@ -40,39 +39,24 @@ export function DocumentUploadCard({
         alert("Veuillez sélectionner une image (JPG, PNG, WebP)");
         return;
       }
-
-      setProcessing(true);
-      setProgress(5);
-      setResult(undefined);
-
-      // Compress image if needed (solves HTTP 413 on mobile)
-      let fileToSend = file;
-      try {
-        setProgress(10);
-        const compressed = await compressImage(file);
-        fileToSend = compressed.file;
-        console.log(`📦 Image: ${file.size} → ${compressed.size} bytes (${compressed.compressionRatio}%)`);
-      } catch (error) {
-        console.warn("⚠️ Compression failed, using original:", error);
-      }
-
-      // Show preview
-      const url = URL.createObjectURL(fileToSend);
+      const url = URL.createObjectURL(file);
       setPreviewUrl(url);
-      setProgress(20);
+      setProcessing(true);
+      setProgress(15);
+      setResult(undefined);
 
       // Animate progress bar
       const progressTimer = setInterval(() => {
-        setProgress((p) => (p < 85 ? p + Math.random() * 6 : p));
+        setProgress((p) => (p < 88 ? p + Math.random() * 8 : p));
       }, 250);
 
       try {
-        const r = await extractFromDocument(fileToSend, type);
+        const r = await extractFromDocument(file, type);
         clearInterval(progressTimer);
         setProgress(100);
         setResult(r);
         if (r.success) {
-          onExtracted(fileToSend, r);
+          onExtracted(file, r);
         }
       } catch (e) {
         clearInterval(progressTimer);
@@ -87,26 +71,7 @@ export function DocumentUploadCard({
   const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) handleFile(file);
-    // Reset input to allow re-uploading same file
-    if (e.target) {
-      e.target.value = "";
-    }
-  };
-
-  const handleCameraClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (cameraInputRef.current) {
-      cameraInputRef.current.click();
-    }
-  };
-
-  const handleFileClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+    e.target.value = ""; // Allow re-uploading same file
   };
 
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
@@ -182,15 +147,13 @@ export function DocumentUploadCard({
             <p className="mt-1 text-[10px] text-slate-500">JPG, PNG (max 10 MB)</p>
             <div className="mt-3 flex gap-2">
               <button
-                type="button"
-                onClick={handleFileClick}
+                onClick={() => fileInputRef.current?.click()}
                 className="flex items-center gap-1 rounded-lg bg-navy-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-navy-800"
               >
                 <Upload className="h-3 w-3" /> Fichier
               </button>
               <button
-                type="button"
-                onClick={handleCameraClick}
+                onClick={() => cameraInputRef.current?.click()}
                 className="flex items-center gap-1 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-600"
               >
                 <Camera className="h-3 w-3" /> Caméra
@@ -202,7 +165,6 @@ export function DocumentUploadCard({
               accept="image/*"
               className="hidden"
               onChange={onInputChange}
-              onClick={(e) => e.stopPropagation()}
             />
             <input
               ref={cameraInputRef}
@@ -211,7 +173,6 @@ export function DocumentUploadCard({
               capture="environment"
               className="hidden"
               onChange={onInputChange}
-              onClick={(e) => e.stopPropagation()}
             />
           </div>
         ) : (

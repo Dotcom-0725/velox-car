@@ -22,7 +22,7 @@ export function WhatsAppFloat() {
 
   return (
     <motion.a
-      href={`https://wa.me/212677160264?text=${encodeURIComponent(message)}`}
+      href={`https://wa.me/212671615948?text=${encodeURIComponent(message)}`}
       target="_blank"
       rel="noopener noreferrer"
       initial={{ scale: 0, opacity: 0 }}

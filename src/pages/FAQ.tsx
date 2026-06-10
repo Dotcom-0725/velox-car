@@ -131,7 +131,7 @@ export function FAQ() {
               </p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
-              <a href="https://wa.me/212677160264" target="_blank" rel="noopener noreferrer" className="btn-premium flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 px-5 py-2.5 text-sm font-bold hover:bg-emerald-600">
+              <a href="https://wa.me/212671615948" target="_blank" rel="noopener noreferrer" className="btn-premium flex items-center justify-center gap-1.5 rounded-full bg-emerald-500 px-5 py-2.5 text-sm font-bold hover:bg-emerald-600">
                 <MessageCircle className="h-4 w-4" /> WhatsApp
               </a>
               <Link to="/contact" className="flex items-center justify-center gap-1.5 rounded-full border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-bold backdrop-blur hover:bg-white/20">

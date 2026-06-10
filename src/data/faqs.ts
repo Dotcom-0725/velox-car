@@ -143,9 +143,9 @@ export const FAQS: FAQ[] = [
       ar: "كيف يعمل التوصيل للمطار؟",
     },
     answer: {
-      fr: "La livraison à l'aéroport TNG est gratuite. À votre arrivée, présentez-vous au comptoir VELOX (Hall des arrivées) ou appelez le +212 677 16 02 64. Un agent vous accompagnera jusqu'au véhicule avec une navette gratuite si nécessaire.",
-      en: "Delivery to TNG airport is free. On arrival, go to the VELOX counter (Arrivals Hall) or call +212 677 16 02 64. An agent will escort you to the vehicle with a free shuttle if needed.",
-      ar: "التوصيل إلى مطار TNG مجاني. عند الوصول، توجه إلى مكتب فيلوكس (قاعة الوصول) أو اتصل بـ +212 677 16 02 64. سيرافقك وكيل إلى السيارة مع shuttle مجاني عند الحاجة.",
+      fr: "La livraison à l'aéroport TNG est gratuite. À votre arrivée, présentez-vous au comptoir VELOX (Hall des arrivées) ou appelez le +212 6 71 61 59 48. Un agent vous accompagnera jusqu'au véhicule avec une navette gratuite si nécessaire.",
+      en: "Delivery to TNG airport is free. On arrival, go to the VELOX counter (Arrivals Hall) or call +212 6 71 61 59 48. An agent will escort you to the vehicle with a free shuttle if needed.",
+      ar: "التوصيل إلى مطار TNG مجاني. عند الوصول، توجه إلى مكتب فيلوكس (قاعة الوصول) أو اتصل بـ +212 6 71 61 59 48. سيرافقك وكيل إلى السيارة مع shuttle مجاني عند الحاجة.",
     },
   },
   {
@@ -156,9 +156,9 @@ export const FAQS: FAQ[] = [
       ar: "ما هو الإجراء في حالة وقوع حادث؟",
     },
     answer: {
-      fr: "Contactez immédiatement notre hotline 24/7 : +212 677 16 02 64. Ne déplacez pas le véhicule avant l'arrivée de l'assistance. Un constat amiable doit être rempli. Tout accident non déclaré annule la couverture d'assurance.",
-      en: "Contact our 24/7 hotline immediately: +212 677 16 02 64. Do not move the vehicle before assistance arrives. An accident report must be filled. Any unreported accident voids the insurance coverage.",
-      ar: "اتصل فوراً بالخط الساخن 24/7: +212 677 16 02 64. لا تحرك السيارة قبل وصول المساعدة. يجب ملء تقرير الحادث. أي حادث غير مُبلغ عنه يُبطل التأمين.",
+      fr: "Contactez immédiatement notre hotline 24/7 : +212 6 71 61 59 48. Ne déplacez pas le véhicule avant l'arrivée de l'assistance. Un constat amiable doit être rempli. Tout accident non déclaré annule la couverture d'assurance.",
+      en: "Contact our 24/7 hotline immediately: +212 6 71 61 59 48. Do not move the vehicle before assistance arrives. An accident report must be filled. Any unreported accident voids the insurance coverage.",
+      ar: "اتصل فوراً بالخط الساخن 24/7: +212 6 71 61 59 48. لا تحرك السيارة قبل وصول المساعدة. يجب ملء تقرير الحادث. أي حادث غير مُبلغ عنه يُبطل التأمين.",
     },
   },
 ];

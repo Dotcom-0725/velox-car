@@ -122,7 +122,7 @@ export function Contact() {
                     {submitting ? t("common.loading") : (<><Send className="h-4 w-4" /> {t("contact.send")}</>)}
                   </button>
                   <a
-                    href={`https://wa.me/212677160264?text=${encodeURIComponent("Bonjour VELOX CAR, " + (form.message || "je souhaite des informations."))}`}
+                    href={`https://wa.me/212671615948?text=${encodeURIComponent("Bonjour VELOX CAR, " + (form.message || "je souhaite des informations."))}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-emerald-500 bg-emerald-50 px-6 py-3.5 text-sm font-extrabold text-emerald-700 hover:bg-emerald-100"
@@ -153,13 +153,13 @@ export function Contact() {
                   </a>
                 </li>
                 <li>
-                  <a href="https://wa.me/212677160264" target="_blank" rel="noopener noreferrer" className="group flex items-start gap-3 rounded-2xl bg-slate-50 p-3 transition-colors hover:bg-emerald-50">
+                  <a href="https://wa.me/212671615948" target="_blank" rel="noopener noreferrer" className="group flex items-start gap-3 rounded-2xl bg-slate-50 p-3 transition-colors hover:bg-emerald-50">
                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white">
                       <MessageCircle className="h-4 w-4" />
                     </div>
                     <div>
                       <p className="text-xs font-bold uppercase text-slate-500">{t("contact.whatsapp")}</p>
-                      <p className="text-sm font-extrabold text-slate-900 group-hover:text-emerald-700">+212 6 77 16 02 64</p>
+                      <p className="text-sm font-extrabold text-slate-900 group-hover:text-emerald-700">+212 6 71 61 59 48</p>
                     </div>
                   </a>
                 </li>
@@ -216,7 +216,7 @@ export function Contact() {
                     </svg>
                   </a>
                   <a
-                    href="https://wa.me/212677160264"
+                    href="https://wa.me/212671615948"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500 text-white"

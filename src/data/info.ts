@@ -4,8 +4,8 @@ export const BUSINESS = {
   legalName: "VELOX CARS SARL",
   email: "contact@veloxcars.ma",
   phones: ["+212 6 68 35 39 49", "+212 6 32 00 50 07"],
-  whatsapp: "+212 6 77 16 02 64",
-  whatsappRaw: "212677160264", // for wa.me
+  whatsapp: "+212 6 71 61 59 48",
+  whatsappRaw: "212671615948", // for wa.me
   address: "Rue Al Amal, Tanger 90060, Morocco",
   googlePlusCode: "P5V6+86Q Tanger",
   gps: { lat: 35.742669, lng: -5.8415239 },

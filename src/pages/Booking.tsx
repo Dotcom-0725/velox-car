@@ -647,7 +647,7 @@ export function Booking() {
             <div className="rounded-3xl bg-gradient-to-br from-navy-700 to-navy-900 p-5 text-white">
               <p className="text-xs font-bold uppercase tracking-wider text-amber-300">{locale === "ar" ? "تحتاج مساعدة؟" : locale === "en" ? "Need help?" : "Besoin d'aide ?"}</p>
               <a href="tel:+212668353949" className="mt-2 block text-sm font-bold hover:text-amber-300">+212 6 68 35 39 49</a>
-              <a href="https://wa.me/212677160264" target="_blank" rel="noopener noreferrer" className="mt-1 block text-sm font-bold hover:text-amber-300">WhatsApp</a>
+              <a href="https://wa.me/212671615948" target="_blank" rel="noopener noreferrer" className="mt-1 block text-sm font-bold hover:text-amber-300">WhatsApp</a>
             </div>
           </div>
         </aside>

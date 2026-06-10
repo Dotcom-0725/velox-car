@@ -43,7 +43,7 @@ export function Legal() {
                 <h2 className="mt-6 text-lg font-extrabold text-slate-900">5. Restitution & retard</h2>
                 <p>Tolérance de 29 minutes. Au-delà, une journée supplémentaire est facturée. Retard supérieur à 3h sans contact = no-show.</p>
                 <h2 className="mt-6 text-lg font-extrabold text-slate-900">6. Sinistres & assistance</h2>
-                <p>Hotline 24/7 : +212 677 16 02 64. Tout accident doit être déclaré immédiatement. Le non-respect de cette clause annule la couverture d'assurance.</p>
+                <p>Hotline 24/7 : +212 6 71 61 59 48. Tout accident doit être déclaré immédiatement. Le non-respect de cette clause annule la couverture d'assurance.</p>
                 <h2 className="mt-6 text-lg font-extrabold text-slate-900">7. Franchise transfrontalière</h2>
                 <p>Les traversées vers Ceuta et l'Espagne sont autorisées avec préavis de 48h et un supplément de 200 MAD (assurance frontalière). Document "carte verte" remis sur demande.</p>
                 <h2 className="mt-6 text-lg font-extrabold text-slate-900">8. Paiement</h2>

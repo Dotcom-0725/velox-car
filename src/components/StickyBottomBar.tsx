@@ -15,7 +15,7 @@ export function StickyBottomBar() {
           <span className="text-[10px] font-bold uppercase tracking-wide">{t("contact.phones").slice(0, 4)}</span>
         </a>
         <a
-          href="https://wa.me/212677160264"
+          href="https://wa.me/212671615948"
           target="_blank"
           rel="noopener noreferrer"
           className="flex flex-col items-center gap-0.5 rounded-xl bg-emerald-500 py-1.5 text-white active:bg-emerald-600"

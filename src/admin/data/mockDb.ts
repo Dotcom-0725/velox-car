@@ -539,7 +539,7 @@ function seedTemplates(): MessageTemplate[] {
     { id: "t3", name: "Rappel restitution (24h avant)", category: "reminder", body: "Bonjour {nom}, votre restitution est prévue demain à {heure} au {lieu}. Merci de restituer le véhicule avec le plein. À demain ! - VELOX CAR", active: true },
     { id: "t4", name: "Remerciement après location", category: "thank-you", body: "Bonjour {nom}, merci d'avoir choisi VELOX CAR ! Nous espérons que votre expérience a été à la hauteur de vos attentes. À très bientôt !", active: true },
     { id: "t5", name: "Demande d'avis Google", category: "review", body: "Bonjour {nom}, votre avis compte pour nous ! Pourriez-vous laisser une note Google ? https://g.page/r/velox-cars/review Merci infiniment 🙏", active: true },
-    { id: "t6", name: "Promotion week-end", category: "promo", body: "🎉 Offre VELOX CAR : -20% sur toutes les réservations week-end ce mois-ci ! Réservez vite : wa.me/212677160264", active: true },
+    { id: "t6", name: "Promotion week-end", category: "promo", body: "🎉 Offre VELOX CAR : -20% sur toutes les réservations week-end ce mois-ci ! Réservez vite : wa.me/212671615948", active: true },
   ];
 }
 

@@ -53,7 +53,7 @@ export const googleMapsDirectionsUrl = (lat: number, lng: number): string => {
 };
 
 export const waLink = (message: string): string => {
-  return `https://wa.me/212677160264?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/212671615948?text=${encodeURIComponent(message)}`;
 };
 
 export const formatBookingMessage = (params: {

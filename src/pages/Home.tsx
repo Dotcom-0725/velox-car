@@ -195,7 +195,7 @@ export function Home() {
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-white/80">WhatsApp 24/7</p>
-                      <p className="text-sm font-bold text-white">+212 677 16 02 64</p>
+                      <p className="text-sm font-bold text-white">+212 6 71 61 59 48</p>
                     </div>
                   </div>
                 </div>
@@ -473,7 +473,7 @@ export function Home() {
               <ChevronRight className="h-4 w-4 rtl-flip" />
             </Link>
             <a
-              href="https://wa.me/212677160264"
+              href="https://wa.me/212671615948"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-7 py-3.5 text-base font-bold text-white backdrop-blur transition-all hover:bg-white/10"

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { } from "react";
 import { motion } from "framer-motion";
-import { Code2, Sparkles, TrendingUp, Zap, Globe, Smartphone, ShieldCheck, ArrowRight, Star, ShieldCheck as Shield, Heart } from "lucide-react";
+import { Sparkles, TrendingUp, Zap, Globe, Smartphone, ShieldCheck, ArrowRight, ShieldCheck as Shield, Heart } from "lucide-react";
 import { useApp } from "../context/AppContext";
 
 const WHATSAPP_NUMBER = "212628537649";
@@ -107,7 +107,6 @@ const COPY = {
 export function DeveloperBanner() {
   const { locale } = useApp();
   const t = COPY[locale] || COPY.fr;
-  const [imgError, setImgError] = useState(false);
 
   const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t.waMessage)}`;
 
@@ -128,93 +127,35 @@ export function DeveloperBanner() {
       </div>
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
-        {/* Eyebrow */}
+        {/* Developer Credit Title */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mb-6 text-center"
+          className="mb-8 text-center"
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-amber-300 backdrop-blur">
-            <Sparkles className="h-3.5 w-3.5" />
-            {t.eyebrow}
-          </span>
+          <div className="inline-flex flex-col items-center gap-1">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-amber-400 animate-pulse" />
+              <Sparkles className="h-4 w-4 text-amber-300" />
+              <span className="text-sm font-bold uppercase tracking-wider text-amber-200">
+                {locale === "ar" ? "تم تصميم وتطوير هذا الموقع من طرف" : locale === "en" ? "Designed & Developed by" : "Conçu & Développé par"}
+              </span>
+              <Sparkles className="h-4 w-4 text-amber-300" />
+              <Sparkles className="h-5 w-5 text-amber-400 animate-pulse" />
+            </div>
+            <h3 className="text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
+              Rachid <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-orange-400 bg-clip-text text-transparent">DevWorks</span>
+            </h3>
+          </div>
         </motion.div>
 
-        <div className="grid items-center gap-8 lg:grid-cols-[auto_1fr] lg:gap-12">
-          {/* ============ LEFT: Photo + identity card ============ */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="flex flex-col items-center text-center lg:items-start lg:text-start"
-          >
-            {/* Photo with decorative ring */}
-            <div className="relative">
-              {/* Animated glow ring */}
-              <div className="absolute -inset-3 rounded-full bg-gradient-to-tr from-amber-500 via-orange-400 to-amber-300 opacity-75 blur-md animate-pulse" />
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-amber-400 to-amber-300" />
-
-              {/* Photo container */}
-              <div className="relative h-44 w-44 overflow-hidden rounded-full ring-4 ring-white/90 shadow-2xl sm:h-52 sm:w-52">
-                {!imgError ? (
-                  <img
-                    src="/dev/rachid-devworks.jpg"
-                    alt="Rachid DevWorks - Web Developer"
-                    onError={() => setImgError(true)}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  // Elegant SVG fallback if image not yet uploaded
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-navy-700 to-navy-900">
-                    <div className="text-center text-white">
-                      <div className="mb-1 text-4xl font-black">RD</div>
-                      <div className="text-[10px] font-bold uppercase tracking-widest text-amber-300">DevWorks</div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Online badge */}
-              <div className="absolute -bottom-1 end-2 flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white ring-4 ring-slate-900 shadow-lg">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
-                </span>
-                {t.available}
-              </div>
-            </div>
-
-            {/* Identity card */}
-            <div className="mt-6">
-              <p className="text-2xl font-black tracking-tight text-white sm:text-3xl">
-                Rachid <span className="text-amber-400">DevWorks</span>
-              </p>
-              <p className="mt-1 flex items-center justify-center gap-1.5 text-sm font-semibold text-slate-300 lg:justify-start">
-                <Code2 className="h-3.5 w-3.5 text-amber-400" />
-                {locale === "ar" ? "مطور ومصمم مواقع" : locale === "en" ? "Web Developer & Designer" : "Développeur & Designer Web"}
-              </p>
-
-              {/* Stars + experience */}
-              <div className="mt-2 flex items-center justify-center gap-2 lg:justify-start">
-                <div className="flex gap-0.5">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <span className="text-xs text-slate-400">· {locale === "ar" ? "+50 مشروع" : "50+ projets"}</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* ============ RIGHT: Marketing copy ============ */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
             {/* Hook */}
             <h2 className="text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl lg:text-4xl">
               {t.title}
@@ -359,7 +300,6 @@ export function DeveloperBanner() {
               💡 {t.tagline} · {t.response} 🚀
             </p>
           </motion.div>
-        </div>
       </div>
     </section>
   );

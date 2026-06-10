@@ -44,28 +44,26 @@ export function AdminLayout() {
   const navigate = useNavigate();
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
-  const { show } = useToast();
 
-  // Re-render badges / notification count whenever a sync event arrives
   useSyncRefresh(["booking:created", "booking:updated", "booking:deleted", "contact:received", "review:submitted", "car:status-changed"]);
 
-  // Show a desktop-style toast on incoming public submissions (real-time feel)
   useEffect(() => {
     return subscribe((evt) => {
       if (evt.type === "booking:created") {
+        const { show } = useToast();
         show(`🎉 Nouvelle réservation : ${evt.payload.reference} — ${evt.payload.customerName}`, "success");
       } else if (evt.type === "contact:received") {
+        const { show } = useToast();
         show(`✉️ Message de ${evt.payload.name} : ${evt.payload.subject}`, "info");
       } else if (evt.type === "review:submitted") {
+        const { show } = useToast();
         show(`⭐ Nouvel avis (${evt.payload.rating}/5) de ${evt.payload.name}`, "info");
       }
     });
-  }, [show]);
+  }, []);
 
-  // Close sidebar on navigation
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
 
-  // Click outside
   useEffect(() => {
     const h = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) setProfileOpen(false);
@@ -75,7 +73,6 @@ export function AdminLayout() {
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "n") {
@@ -94,10 +91,17 @@ export function AdminLayout() {
 
   const filteredNav = NAV.filter((n) => !n.roles || n.roles.includes(user.role));
 
+  const isRTL = dir === "rtl";
+
   return (
     <div className="min-h-screen bg-slate-100" dir={dir} lang={locale}>
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 start-0 z-50 w-72 transform border-e border-slate-200 bg-white transition-transform lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full rtl:translate-x-full"}`}>
+      <aside
+        className={`fixed top-0 bottom-0 z-50 w-72 bg-white border-slate-200 shadow-xl transition-transform duration-300 ${
+          isRTL ? "right-0 left-auto border-l" : "left-0 right-auto border-r"
+        } ${sidebarOpen ? "translate-x-0" : isRTL ? "translate-x-full" : "-translate-x-full"} lg:translate-x-0 lg:shadow-none`}
+        dir="ltr"
+      >
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
@@ -174,7 +178,7 @@ export function AdminLayout() {
               {t("admin.publicSite")}
             </Link>
             <button
-              onClick={() => { if (confirm("Réinitialiser toutes les données démo ?")) { db.reset(); window.location.reload(); } }}
+              onClick={() => { if (confirm(t("admin.confirmReset"))) { db.reset(); window.location.reload(); } }}
               className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-900"
             >
               <Database className="h-3.5 w-3.5" />
@@ -190,14 +194,15 @@ export function AdminLayout() {
       )}
 
       {/* Main area */}
-      <div className="lg:ms-72">
+      <div className={`min-h-screen ${isRTL ? "lg:mr-72" : "lg:ml-72"}`}>
         {/* Top bar */}
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur-lg">
           <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setSidebarOpen(true)}
+                onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 lg:hidden"
+                aria-label="Toggle menu"
               >
                 <Menu className="h-5 w-5" />
               </button>
@@ -231,10 +236,10 @@ export function AdminLayout() {
                       initial={{ opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -8 }}
-                      className="absolute end-0 z-40 mt-2 w-80 overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200 sm:w-96"
+                      className="absolute end-0 z-50 mt-2 w-80 overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200 sm:w-96"
                     >
                       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-                        <p className="text-sm font-extrabold text-slate-900">Notifications</p>
+                        <p className="text-sm font-extrabold text-slate-900">{t("admin.notifications")}</p>
                         <button
                           onClick={() => {
                             db.saveNotifications(notifications.map((n) => ({ ...n, read: true })));
@@ -291,7 +296,7 @@ export function AdminLayout() {
                       initial={{ opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -8 }}
-                      className="absolute end-0 z-40 mt-2 w-64 overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200"
+                      className="absolute end-0 z-50 mt-2 w-64 overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200"
                     >
                       <div className="border-b border-slate-100 p-4">
                         <p className="text-sm font-extrabold text-slate-900">{user.fullName}</p>

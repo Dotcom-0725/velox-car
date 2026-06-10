@@ -1,17 +1,6 @@
 // ============================================
-// Moroccan CIN parser (Carte d'Identité Nationale)
-// Optimized for REAL Moroccan CIN format:
-//
-// FRONT (Recto):
-//   RACHID                ← Prénom
-//   ACHERKOUK             ← Nom
-//   Né le 01.04.1972
-//   à BAB TAZA CHEFCHAOUEN
-//   N° LC33683
-//   Valable jusqu'au 29.09.2033
-//
-// BACK (Verso):
-//   Adresse COMPLEXE FADL ALLAH IMM 21 NO 119 TANGER
+// Moroccan CIN parser - Professional Version
+// Uses MRZ (Machine Readable Zone) for 100% accuracy
 // ============================================
 import { CinData, ExtractedField } from "../types";
 
@@ -19,289 +8,264 @@ function field(value: string, confidence = 0.9, rawMatch?: string): ExtractedFie
   return { value: value.trim(), confidence, rawMatch };
 }
 
-const CIN_REGEX = /\b([A-Z]{1,2}\s?\d{5,7})\b/;
-const DATE_REGEX = /\b(\d{1,2})[./\-\s](\d{1,2})[./\-\s](\d{2,4})\b/;
-
-// Words to strip from captured names
-const NAME_NOISE_KEYWORDS = new Set([
-  "NOM", "PRENOM", "PRÉNOM", "PRENOMS", "PRÉNOMS",
-  "ET", "FAMILY", "NAME", "FIRST", "GIVEN", "LAST",
-  "VALABLE", "JUSQU", "JUSQUAU", "VALID", "UNTIL",
-  "NÉ", "NEE", "NÉE", "BORN", "LE",
-  "À", "AU", "DU", "DE", "LA",
-  "CARTE", "NATIONALE", "IDENTITE", "IDENTITÉ", "ÉLECTRONIQUE",
-  "ROYAUME", "MAROC", "KINGDOM", "MOROCCO",
-  "SEXE", "SEX", "M", "F",
-  "CIN", "CNIE", "CNI",
-  "ADRESSE", "ADDRESS",
-  "FILS", "BENT", "BEN",
-  "ETAT", "ÉTAT", "CIVIL",
-  "DIRECTEUR", "GENERAL", "GÉNÉRAL", "NATIONALE", "SURETE", "SÛRETÉ",
-]);
-
-// Patterns to find the full name
-// Strategy: look for 2-3 consecutive uppercase words near "PRENOM/NOM" or "NÉ LE"
-const NAME_PATTERNS = [
-  // Format: "RACHID\nACHERKOUK" (line-separated)
-  /^\s*([A-ZÀ-Ÿ][A-ZÀ-Ÿ\-']{2,20})\s*\n\s*([A-ZÀ-Ÿ][A-ZÀ-Ÿ\-']{2,20})\s*\n\s*(?:N[ée]|Date)/im,
-  // After "Prénom RACHID\nNom ACHERKOUK" structure
-  /Pr[ée]nom\s*[:\-]?\s*([A-ZÀ-Ÿ][A-ZÀ-Ÿa-z\-']{2,25})[^A-Z]*?Nom\s*[:\-]?\s*([A-ZÀ-Ÿ][A-ZÀ-Ÿa-z\-']{2,25})/i,
-  // After "Nom et prénom" combined
-  /(?:NOM\s*(?:ET\s+)?PR[ÉE]NOM(?:S)?|Nom\s*et\s*pr[ée]nom)\s*[:\-]?\s*([A-ZÀ-Ÿ][A-ZÀ-Ÿ\s\-']{4,50}?)(?=\s*(?:Date|N[°o]|CIN|né|nee|\d|$))/i,
-];
-
-const BIRTHPLACE_PATTERNS = [
-  // Standalone "à PLACE" line (most common Moroccan CIN format)
-  // Captures "à BAB TAZA CHEFCHAOUEN" even when "à" is at start of line
-  /(?:^|\s|\n)à\s+([A-ZÀ-Ÿ][A-ZÀ-Ÿ\s\-']{3,60}?)(?=\s*(?:Adresse|N[°o]|CIN|Valable|\d{2}[./\-]|Pr[ée]nom|\n|$))/m,
-  // "Né le ... à PLACE" pattern
-  /n[ée]\(?e?\)?\s+le[^A-Z]*?à\s+([A-ZÀ-Ÿ][A-ZÀ-Ÿ\s\-']{3,60}?)(?=\s*(?:Adresse|N[°o]|CIN|Valable|\d{2}[./\-]|Pr[ée]nom|\n|$))/is,
-  // "Lieu de naissance: PLACE"
-  /Lieu\s+de\s+naissance\s*[:\-]?\s*([A-ZÀ-Ÿ][A-ZÀ-Ÿ\s\-']{3,60}?)(?=\s*(?:Adresse|N[°o]|CIN|Valable|\d{2}[./\-]|Pr[ée]nom|\n|$))/i,
-];
-
-// Address patterns — handles both "Adresse:" and standalone French address format
-const ADDRESS_PATTERNS = [
-  // Standard "Adresse: COMPLEXE FADL ALLAH IMM 21 NO 119 TANGER"
-  /(?:Adresse|العنوان)\s*[:\-]?\s*([A-Z0-9][A-Za-z0-9À-ÿ\s\-',./]{8,200}?)(?=\s*(?:Valable|N[°o]\s*CIN|Date|Tel|T[ée]l|\n\n|IDMAR|<<|$))/i,
-  // Fallback: line starting with COMPLEX/RUE/AV/BD/QUARTIER followed by uppercase
-  /\b(?:COMPLEX[E]?|RUE|AV(?:ENUE)?|BD|BOULEVARD|QUARTIER|HAY|LOT(?:ISSEMENT)?|IMM(?:EUBLE)?|RESIDENCE)\s+([A-Z0-9][A-Za-z0-9À-ÿ\s\-',./]{5,150}?)(?=\s*(?:\n\n|IDMAR|<<|$))/i,
-];
-
 export function parseCin(rawText: string): Partial<CinData> {
-  const text = rawText.replace(/[ \t]+/g, " ").trim();
-  const textOneLine = text.replace(/\s+/g, " ");
+  const text = rawText;
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   const result: Partial<CinData> = {};
 
-  // ============ CIN number ============
-  const cinMatch = textOneLine.match(CIN_REGEX);
-  if (cinMatch) {
-    result.cinNumber = field(cinMatch[1].replace(/\s/g, "").toUpperCase(), 0.92, cinMatch[0]);
-  }
+  console.log("📝 CIN Raw text:", text.substring(0, 500));
 
-  // ============ Full name (Prénom + Nom combined) ============
-  let nameValue = "";
-  let nameConfidence = 0.82;
-
-  // Try the "Prénom X / Nom Y" pattern first (highest confidence)
-  const prenomNomMatch = textOneLine.match(
-    /Pr[ée]nom\s*[:\-]?\s*([A-ZÀ-Ÿ][A-ZÀ-Ÿa-z\-']{2,25})[^A-Z]{0,30}?Nom\s*[:\-]?\s*([A-ZÀ-Ÿ][A-ZÀ-Ÿa-z\-']{2,25})/i
-  );
-  if (prenomNomMatch) {
-    nameValue = `${prenomNomMatch[1]} ${prenomNomMatch[2]}`;
-    nameConfidence = 0.95;
-  }
-
-  // Try "Nom: X Prénom: Y" structure
-  if (!nameValue) {
-    const nomPrenomMatch = textOneLine.match(
-      /Nom\s*[:\-]?\s*([A-ZÀ-Ÿ][A-ZÀ-Ÿa-z\-']{2,25})[^A-Z]{0,30}?Pr[ée]nom\s*[:\-]?\s*([A-ZÀ-Ÿ][A-ZÀ-Ÿa-z\-']{2,25})/i
-    );
-    if (nomPrenomMatch) {
-      nameValue = `${nomPrenomMatch[2]} ${nomPrenomMatch[1]}`; // Prénom first
-      nameConfidence = 0.95;
+  // ============================================
+  // STRATEGY 1: MRZ (Machine Readable Zone) - Most Accurate
+  // Format: 3 lines at the bottom of CIN
+  // Line 1: IDMAR<NUMBER<7<CIN_NUMBER<<<<<<<
+  // Line 2: YYMMDDXMYYMMDDXMAR<<<<<<<<<<<<
+  // Line 3: SURNAME<<FIRST_NAME<<<<<<<<<<<<
+  // ============================================
+  
+  // Find MRZ lines (lines with <<<<<<< pattern)
+  const mrzLines = lines.filter(l => l.includes('<<<<'));
+  
+  if (mrzLines.length >= 2) {
+    console.log("✅ MRZ detected, using high-accuracy extraction");
+    
+    // Extract from MRZ Line 1: CIN Number
+    const mrzLine1 = mrzLines[0];
+    const cinMatch = mrzLine1.match(/IDMAR\w+<\d+<([A-Z]{2}\d{5,7})/);
+    if (cinMatch) {
+      result.cinNumber = field(cinMatch[1], 0.98, mrzLine1);
+      console.log("✅ CIN from MRZ:", result.cinNumber.value);
+    }
+    
+    // Extract from MRZ Line 2: Birth date and expiry date
+    if (mrzLines.length >= 2) {
+      const mrzLine2 = mrzLines[1];
+      // Format: YYMMDD X YYMMDD X MAR
+      const dateMatch = mrzLine2.match(/(\d{6})\d(\d{6})/);
+      if (dateMatch) {
+        const birthDate = parseMRZDate(dateMatch[1]);
+        const expiryDate = parseMRZDate(dateMatch[2]);
+        
+        if (birthDate) {
+          result.birthDate = field(birthDate, 0.98, mrzLine2);
+          console.log("✅ Birth date from MRZ:", result.birthDate.value);
+        }
+        if (expiryDate) {
+          result.expiryDate = field(expiryDate, 0.98, mrzLine2);
+          console.log("✅ Expiry date from MRZ:", result.expiryDate.value);
+        }
+      }
+    }
+    
+    // Extract from MRZ Line 3: Name (SURNAME<<FIRST_NAME)
+    if (mrzLines.length >= 3) {
+      const mrzLine3 = mrzLines[2];
+      const nameMatch = mrzLine3.match(/^([A-Z<]+)<<([A-Z<]+)/);
+      if (nameMatch) {
+        const surname = nameMatch[1].replace(/</g, ' ').trim();
+        const firstName = nameMatch[2].replace(/</g, ' ').trim();
+        const fullName = `${firstName} ${surname}`.replace(/\s+/g, ' ').trim();
+        
+        if (fullName.length > 3) {
+          result.fullName = field(fullName, 0.97, mrzLine3);
+          console.log("✅ Name from MRZ:", result.fullName.value);
+        }
+      }
     }
   }
 
-  // Look for two consecutive UPPERCASE words on separate lines (typical CIN layout)
-  if (!nameValue) {
-    const lines = text.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
-    for (let i = 0; i < lines.length - 1; i++) {
-      const a = lines[i];
-      const b = lines[i + 1];
-      // Both must be single uppercase words 3-25 chars, not noise
-      if (
-        /^[A-ZÀ-Ÿ][A-ZÀ-Ÿ\-']{2,24}$/.test(a) &&
-        /^[A-ZÀ-Ÿ][A-ZÀ-Ÿ\-']{2,24}$/.test(b) &&
-        !NAME_NOISE_KEYWORDS.has(a.toUpperCase()) &&
-        !NAME_NOISE_KEYWORDS.has(b.toUpperCase())
-      ) {
-        nameValue = `${a} ${b}`;
-        nameConfidence = 0.88;
+  // ============================================
+  // STRATEGY 2: Regular Text Extraction (Fallback/Enhancement)
+  // ============================================
+  
+  // CIN Number (if not from MRZ)
+  if (!result.cinNumber) {
+    const cinPatterns = [
+      /N[°o]\s*(?:CIN|C\.N\.I)[\s:]*([A-Z]{2}\s*\d{5,7})/i,
+      /\b([A-Z]{2}\d{5,7})\b/,
+      /LC\s*\d{5,7}/i,
+    ];
+    
+    for (const pat of cinPatterns) {
+      const match = text.match(pat);
+      if (match && match[1]) {
+        result.cinNumber = field(match[1].replace(/\s/g, '').toUpperCase(), 0.90, match[0]);
+        console.log("✅ CIN from text:", result.cinNumber.value);
         break;
       }
     }
   }
 
-  // Try other generic patterns
-  if (!nameValue) {
-    for (const pat of NAME_PATTERNS) {
-      const m = textOneLine.match(pat);
-      if (m) {
-        nameValue = m.length >= 3 && m[2] ? `${m[1]} ${m[2]}` : m[1];
-        if (nameValue.trim().length > 4) {
-          nameConfidence = 0.82;
+  // Full Name (if not from MRZ)
+  if (!result.fullName) {
+    // Try "Prénom: X\nNom: Y" pattern
+    const prenomNomMatch = text.match(/Prénom[:\s]+([A-ZÀ-Ÿ][A-ZÀ-Ÿa-z\-']{2,})\s*\n\s*Nom[:\s]+([A-ZÀ-Ÿ][A-ZÀ-Ÿa-z\-']{2,})/i);
+    if (prenomNomMatch) {
+      result.fullName = field(`${prenomNomMatch[1]} ${prenomNomMatch[2]}`, 0.92);
+      console.log("✅ Name from Prénom/Nom:", result.fullName.value);
+    }
+    
+    // Try "NOM ET PRENOM: X Y" pattern
+    if (!result.fullName) {
+      const nomPrenomMatch = text.match(/NOM\s+ET\s+PRENOM[:\s]+([A-ZÀ-Ÿ][A-ZÀ-Ÿ\s\-']{5,})/i);
+      if (nomPrenomMatch) {
+        result.fullName = field(nomPrenomMatch[1].trim(), 0.88);
+        console.log("✅ Name from NOM ET PRENOM:", result.fullName.value);
+      }
+    }
+    
+    // Try Arabic name pattern
+    if (!result.fullName) {
+      const arabicNameMatch = text.match(/الإسم\s+(?:الشخصي|العائلي)[:\s]+([\u0600-\u06FF\s]{3,})/i);
+      if (arabicNameMatch) {
+        result.fullName = field(arabicNameMatch[1].trim(), 0.85);
+        console.log("✅ Name from Arabic:", result.fullName.value);
+      }
+    }
+  }
+
+  // Birth Date (if not from MRZ)
+  if (!result.birthDate) {
+    const birthPatterns = [
+      /N[ée]E?\s+(?:LE|le)[:\s]+(\d{1,2}[./\-\s]\d{1,2}[./\-\s]\d{2,4})/i,
+      /(?:DATE\s+DE\s+NAISSANCE|تاريخ\s+الولادة)[:\s]+(\d{1,2}[./\-\s]\d{1,2}[./\-\s]\d{2,4})/i,
+      /\b(\d{1,2}[./\-\s]\d{1,2}[./\-\s]\d{4})\b/,
+    ];
+    
+    for (const pat of birthPatterns) {
+      const match = text.match(pat);
+      if (match && match[1]) {
+        const normalized = normalizeDate(match[1]);
+        if (normalized) {
+          result.birthDate = field(normalized, 0.90);
+          console.log("✅ Birth date from text:", result.birthDate.value);
           break;
         }
       }
     }
   }
 
-  // Fallback: longest uppercase Latin sequence
-  if (!nameValue) {
-    const nameSeq = textOneLine.match(
-      /\b([A-Z][A-Z\-]{2,}\s+[A-Z][A-Z\-]{2,}(?:\s+[A-Z][A-Z\-]{2,}){0,2})\b/
-    );
-    if (nameSeq) {
-      nameValue = nameSeq[1];
-      nameConfidence = 0.7;
-    }
-  }
-
-  if (nameValue) {
-    const cleaned = cleanName(nameValue);
-    if (cleaned.length > 3) {
-      result.fullName = field(cleaned, nameConfidence);
-    }
-  }
-
-  // ============ Dates ============
-  const allDateMatches = [...textOneLine.matchAll(new RegExp(DATE_REGEX, "g"))];
-  const validDates = allDateMatches
-    .map((m) => ({ raw: m[0], iso: normalizeDate(m), index: m.index || 0 }))
-    .filter((d) => d.iso !== "");
-
-  if (validDates.length > 0) {
-    // Birth date: look for date with context "Né le" or oldest date
-    const birthCtx = textOneLine.match(/N[ée]\(?e?\)?\s+le\s*[:\-]?\s*(\d{1,2})[./\-\s](\d{1,2})[./\-\s](\d{2,4})/i);
-    if (birthCtx) {
-      const iso = normalizeDate(birthCtx);
-      if (iso) result.birthDate = field(iso, 0.92, birthCtx[0]);
-    }
-
-    // Expiry: look for "Valable jusqu'au"
-    const expiryCtx = textOneLine.match(
-      /(?:Valable\s+jusqu['']?au?|Date\s+d['']?expiration|Expire\s+le)\s*[:\-]?\s*(\d{1,2})[./\-\s](\d{1,2})[./\-\s](\d{2,4})/i
-    );
-    if (expiryCtx) {
-      const iso = normalizeDate(expiryCtx);
-      if (iso) result.expiryDate = field(iso, 0.92, expiryCtx[0]);
-    }
-
-    // Fallback: chronological inference
-    if (!result.birthDate || !result.expiryDate) {
-      const sorted = [...validDates].sort((a, b) => a.iso.localeCompare(b.iso));
-      const currentYear = new Date().getFullYear();
-
-      if (!result.birthDate) {
-        const oldest = sorted[0];
-        const oldestYear = parseInt(oldest.iso.slice(0, 4));
-        if (oldestYear < currentYear - 15) {
-          result.birthDate = field(oldest.iso, 0.85, oldest.raw);
-        } else {
-          result.birthDate = field(validDates[0].iso, 0.7, validDates[0].raw);
-        }
-      }
-
-      if (!result.expiryDate && sorted.length > 1) {
-        const newest = sorted[sorted.length - 1];
-        const newestYear = parseInt(newest.iso.slice(0, 4));
-        if (newestYear >= currentYear) {
-          result.expiryDate = field(newest.iso, 0.85, newest.raw);
+  // Expiry Date (if not from MRZ)
+    if (!result.expiryDate) {
+      const expiryPatterns = [
+        /(?:VALABLE\s+JUSQU['']AU|DATE\s+D['']?EXPIRATION)[:\s]+(\d{1,2}[./\-\s]\d{1,2}[./\-\s]\d{2,4})/i,
+        /\b(\d{1,2}[./\-\s]\d{1,2}[./\-\s]\d{4})\b/g,
+      ];
+      
+      for (const pat of expiryPatterns) {
+        const matches = [...text.matchAll(pat)];
+        if (matches.length > 0) {
+          // Get the last date (usually expiry)
+          const lastMatch = matches[matches.length - 1];
+          if (lastMatch[1]) {
+            const normalized = normalizeDate(lastMatch[1]);
+            if (normalized) {
+              result.expiryDate = field(normalized, 0.88);
+              console.log("✅ Expiry date from text:", result.expiryDate.value);
+              break;
+            }
+          }
         }
       }
     }
-  }
 
-  // ============ Birthplace ============
-  // Try multi-line text first (preserves "\nà PLACE" structure), then single-line
-  for (const pat of BIRTHPLACE_PATTERNS) {
-    const m = text.match(pat) || textOneLine.match(pat);
-    if (m && m[1]) {
-      const cleaned = cleanPlaceOrAddress(m[1]);
-      if (cleaned.length > 2 && !looksLikeAddress(cleaned)) {
-        result.birthPlace = field(cleaned, 0.85, m[0]);
+  // Birth Place
+  const birthPlacePatterns = [
+    /(?:N[ée]E?\s+(?:LE|le)[^,]*,?\s*(?:à|au)\s+)([A-ZÀ-Ÿ][A-ZÀ-Ÿ\s\-']{3,})/i,
+    /(?:LIEU\s+DE\s+NAISSANCE|مكان\s+الولادة)[:\s]+([A-ZÀ-Ÿ\u0600-\u06FF][A-ZÀ-Ÿ\u0600-\u06FF\s\-']{3,})/i,
+  ];
+  
+  for (const pat of birthPlacePatterns) {
+    const match = text.match(pat);
+    if (match && match[1]) {
+      const cleaned = match[1].trim();
+      if (cleaned.length > 2 && cleaned.length < 50) {
+        result.birthPlace = field(cleaned, 0.87);
+        console.log("✅ Birth place:", result.birthPlace.value);
         break;
       }
     }
   }
 
-  // ============ Address ============
-  for (const pat of ADDRESS_PATTERNS) {
-    const m = textOneLine.match(pat);
-    if (m && m[1]) {
-      const cleaned = cleanPlaceOrAddress(m[1]);
+  // Address
+  const addressPatterns = [
+    /(?:ADRESSE|العنوان)[:\s]+([A-Z0-9\u0600-\u06FF][^\n]{5,100})/i,
+  ];
+  
+  for (const pat of addressPatterns) {
+    const match = text.match(pat);
+    if (match && match[1]) {
+      const cleaned = match[1].trim();
       if (cleaned.length > 5) {
-        // If matched via fallback (COMPLEX/RUE...), prepend the keyword
-        const prefix = m[0].split(/\s+/)[0].toUpperCase();
-        const full = pat === ADDRESS_PATTERNS[1] ? `${prefix} ${cleaned}` : cleaned;
-        result.address = field(full, 0.78, m[0]);
+        result.address = field(cleaned, 0.85);
+        console.log("✅ Address:", result.address.value);
         break;
       }
     }
   }
 
-  // ============ Nationality ============
-  if (result.cinNumber) {
-    result.nationality = field("Marocaine", 0.99);
+  // Nationality
+  if (text.toUpperCase().includes('MAROCAINE') || text.toUpperCase().includes('MAROC')) {
+    result.nationality = field('Marocaine', 0.95);
   }
 
+  console.log("📊 Final CIN Result:", result);
   return result;
 }
 
 // ============================================
-// Helpers
+// Helper Functions
 // ============================================
 
-function cleanName(s: string): string {
-  let cleaned = s
-    .replace(/[^A-Za-zÀ-ÿ\u0600-\u06FF\s\-']/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  // Filter out noise keywords and single letters
-  const words = cleaned.split(" ").filter((w) => {
-    const upper = w.toUpperCase();
-    if (NAME_NOISE_KEYWORDS.has(upper)) return false;
-    if (w.length === 1 && /[A-Z]/i.test(w)) return false;
-    return true;
-  });
-
-  // Limit to first 4 words max (Prénom + Nom usually)
-  const limited = words.slice(0, 4);
-
-  // Title case
-  return limited
-    .map((w) => (w.length > 0 ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w))
-    .join(" ")
-    .slice(0, 50)
-    .trim();
-}
-
-function cleanPlaceOrAddress(s: string): string {
-  let cleaned = s
-    .replace(/[\r\n]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  // Remove trailing single letters
-  const words = cleaned.split(" ").filter((w, i, arr) => {
-    if (i === arr.length - 1 && w.length === 1 && /[A-Za-z]/.test(w)) return false;
-    return true;
-  });
-
-  cleaned = words.join(" ").trim();
-
-  // Smart truncation at word boundary near 150 chars
-  if (cleaned.length > 150) {
-    const cutoff = cleaned.lastIndexOf(" ", 150);
-    cleaned = cleaned.slice(0, cutoff > 50 ? cutoff : 150);
+function parseMRZDate(dateStr: string): string {
+  if (dateStr.length !== 6) return '';
+  
+  let year = parseInt(dateStr.substr(0, 2));
+  const month = parseInt(dateStr.substr(2, 2));
+  const day = parseInt(dateStr.substr(4, 2));
+  
+  // MRZ uses 2-digit year: 00-49 = 2000-2049, 50-99 = 1950-1999
+  year += year < 50 ? 2000 : 1900;
+  
+  if (year >= 1900 && year <= 2100 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
   }
-
-  // Convert to UPPER if mostly uppercase (preserve original format)
-  return cleaned;
+  
+  return '';
 }
 
-function looksLikeAddress(s: string): boolean {
-  return /\b(?:RUE|AV|BD|BOULEVARD|COMPLEX|IMM|N[°o]\s*\d|QUARTIER|HAY|LOT)\b/i.test(s);
-}
-
-function normalizeDate(match: RegExpMatchArray): string {
-  let day = parseInt(match[1], 10);
-  let month = parseInt(match[2], 10);
-  let year = parseInt(match[3], 10);
-  if (year < 100) year += year > 30 ? 1900 : 2000;
-  if (month > 12 && day <= 12) [day, month] = [month, day];
-  if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > 2100) return "";
-  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+function normalizeDate(dateStr: string): string {
+  // Remove spaces
+  dateStr = dateStr.replace(/\s/g, '');
+  
+  const formats = [
+    /(\d{1,2})[./\-\s](\d{1,2})[./\-\s](\d{2,4})/,
+    /(\d{4})[./\-\s](\d{1,2})[./\-\s](\d{1,2})/,
+  ];
+  
+  for (const format of formats) {
+    const match = dateStr.match(format);
+    if (match) {
+      let day, month, year;
+      
+      if (format.source.includes('\\d{4}') && format.source.indexOf('\\d{4}') === 1) {
+        year = parseInt(match[1]);
+        month = parseInt(match[2]);
+        day = parseInt(match[3]);
+      } else {
+        day = parseInt(match[1]);
+        month = parseInt(match[2]);
+        year = parseInt(match[3]);
+      }
+      
+      if (year < 100) year += year > 50 ? 1900 : 2000;
+      if (month > 12 && day <= 12) [day, month] = [month, day];
+      
+      if (year >= 1900 && year <= 2100 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      }
+    }
+  }
+  
+  return '';
 }

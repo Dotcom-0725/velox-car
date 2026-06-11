@@ -16,7 +16,7 @@ const COPY = {
     cta: "Discutons de votre projet sur WhatsApp",
     ctaShort: "Contactez-moi sur WhatsApp",
     waMessage: "Bonjour Rachid, j'ai vu votre travail sur le site VELOX CARS et je souhaite créer/améliorer mon site web.",
-    badges: ["10+ ans d'expérience", "Sites livrés clés en main", "SEO & Mobile-First", "Support après livraison"],
+    badges: ["Sites livrés clés en main", "SEO & Mobile-First", "Support après livraison"],
     services: [
       { icon: Globe, label: "Sites Web", desc: "Vitrine, e-commerce, sur-mesure" },
       { icon: Smartphone, label: "Mobile-First", desc: "Parfait sur smartphone" },
@@ -48,7 +48,7 @@ const COPY = {
     cta: "Let's talk about your project on WhatsApp",
     ctaShort: "Contact me on WhatsApp",
     waMessage: "Hello Rachid, I saw your work on the VELOX CARS website and I would like to create/improve my website.",
-    badges: ["10+ years of experience", "Turnkey delivery", "SEO & Mobile-First", "After-delivery support"],
+    badges: ["Turnkey delivery", "SEO & Mobile-First", "After-delivery support"],
     services: [
       { icon: Globe, label: "Websites", desc: "Showcase, e-commerce, custom" },
       { icon: Smartphone, label: "Mobile-First", desc: "Perfect on smartphone" },
@@ -80,7 +80,7 @@ const COPY = {
     cta: "تواصل معي على واتساب لمناقشة مشروعك",
     ctaShort: "تواصل معي على واتساب",
     waMessage: "السلام عليكم رشيد، رأيت عملك على موقع VELOX CARS وأود إنشاء أو تحسين موقعي الإلكتروني.",
-    badges: ["خبرة +10 سنوات", "تسليم جاهز للاستخدام", "SEO وتصميم متجاوب", "دعم بعد التسليم"],
+    badges: ["تسليم جاهز للاستخدام", "SEO وتصميم متجاوب", "دعم بعد التسليم"],
     services: [
       { icon: Globe, label: "مواقع إلكترونية", desc: "عرض، تجارة إلكترونية، حسب الطلب" },
       { icon: Smartphone, label: "متوافق مع الهاتف", desc: "مثالي على الهاتف الذكي" },
@@ -111,11 +111,11 @@ export function DeveloperBanner() {
   const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t.waMessage)}`;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-navy-900 to-navy-950 py-14 sm:py-16">
+    <section className="relative overflow-hidden bg-gradient-to-br from-indigo-700 via-purple-600 to-violet-700 py-14 sm:py-16">
       {/* Decorative background */}
-      <div className="pointer-events-none absolute inset-0 opacity-30" style={{
+      <div className="pointer-events-none absolute inset-0 opacity-50" style={{
         backgroundImage:
-          "radial-gradient(circle at 15% 30%, rgba(245,158,11,0.25) 0%, transparent 35%), radial-gradient(circle at 85% 70%, rgba(58,90,232,0.30) 0%, transparent 35%)",
+          "radial-gradient(circle at 15% 30%, rgba(251,191,36,0.35) 0%, transparent 35%), radial-gradient(circle at 85% 70%, rgba(236,72,153,0.40) 0%, transparent 35%)",
       }} />
       <div className="absolute inset-0 bg-grid opacity-[0.04]" />
 
@@ -159,23 +159,23 @@ export function DeveloperBanner() {
         >
 
             {/* Hook */}
-            <h2 className="text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl lg:text-4xl">
+            <h2 className="text-3xl font-black leading-tight tracking-tight text-white drop-shadow-lg sm:text-4xl lg:text-5xl">
               {t.title}
             </h2>
-            <p className="mt-2 text-lg font-bold leading-snug sm:text-xl">
-              <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-orange-400 bg-clip-text text-transparent">
+            <p className="mt-3 text-xl font-bold leading-snug sm:text-2xl lg:text-3xl">
+              <span className="bg-gradient-to-r from-amber-300 via-yellow-400 to-orange-400 bg-clip-text text-transparent drop-shadow-md">
                 {t.titleAccent}
               </span>
             </p>
 
             {/* Description */}
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base">
+            <p className="mt-5 max-w-3xl text-base leading-relaxed text-white/95 sm:text-lg lg:text-xl">
               {t.description}
             </p>
 
             {/* Social proof note */}
-            <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
-              <Zap className="h-3 w-3" />
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border-2 border-emerald-400/60 bg-emerald-500/20 px-4 py-2 text-sm font-bold text-emerald-200 shadow-lg">
+              <Zap className="h-4 w-4" />
               {t.examples}
             </div>
 

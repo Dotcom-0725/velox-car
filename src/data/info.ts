@@ -15,7 +15,7 @@ export const BUSINESS = {
   hoursDetailed: { fr: "Sam-Jeu · 8h00 – 18h00", en: "Sat-Thu · 8:00 AM – 6:00 PM", ar: "السبت-الخميس · 8:00 – 18:00" },
   instagram: "@Velox0cars",
   facebook: "VELOX CAR",
-  serviceAreas: ["Tanger", "Tétouan", "Martil", "M'diq", "Fnideq", "Tanger Med", "Aéroport Ibn Battouta"],
+  serviceAreas: ["Tanger", "Tétouan", "Port de Tanger Ville", "Gare TGV", "Tanger Med", "Aéroport Ibn Battouta"],
 } as const;
 
 // FX rates (display only, actual billing in MAD)
